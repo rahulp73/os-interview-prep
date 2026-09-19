@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Operating systems interview preparation dashboard" />
+  <title>Interview Prep — Operating Systems</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-2: #1c2330;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --orange: #f0883e;
+      --yellow: #e3b341;
+      --purple: #d2a8ff;
+      --red: #f85149;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    ::selection { background: #1f6feb; color: white; }
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+    .app { height: 100vh; display: flex; flex-direction: column; }
+    .tabbar {
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 52px;
+      padding: 0 16px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #161b22, #0d1117);
+      border-bottom: 1px solid #21262d;
+      box-shadow: 0 2px 12px rgba(0,0,0,.26);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-right: 16px;
+      color: #f0f6fc;
+      font-size: 15px;
+      font-weight: 760;
+      white-space: nowrap;
+      letter-spacing: .01em;
+    }
+    .brand-mark { color: var(--blue); font-size: 20px; }
+    .tab-btn {
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 6px 6px 0 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 650;
+      padding: 15px 13px 13px;
+      white-space: nowrap;
+      transition: .15s ease;
+    }
+    .tab-btn:hover { background: #1c233380; color: #e6edf3; }
+    .tab-btn.active { border-bottom-color: var(--blue); background: #58a6ff0b; color: var(--blue); }
+    .mobile-menu {
+      display: none;
+      width: 44px;
+      height: 52px;
+      flex: 0 0 44px;
+      cursor: pointer;
+      border: 0;
+      border-right: 1px solid #21262d;
+      background: #161b22;
+      color: var(--blue);
+      font-size: 20px;
+    }
+
+    .page { display: none; min-height: 0; flex: 1; }
+    .page.active { display: flex; }
+    .sidebar {
+      z-index: 10;
+      display: flex;
+      flex: 0 0 274px;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      border-right: 1px solid #21262d;
+      background: var(--surface);
+    }
+    .sidebar-head { padding: 16px 14px 12px; border-bottom: 1px solid #21262d; }
+    .sidebar-title { display: flex; align-items: center; justify-content: space-between; margin: 0 0 11px; color: var(--blue); font-size: 15px; font-weight: 750; }
+    .count { border-radius: 999px; background: #1f6feb26; color: var(--blue); font-size: 11px; padding: 2px 8px; }
+    .search {
+      width: 100%;
+      border: 1px solid var(--border);
+      outline: 0;
+      border-radius: 6px;
+      padding: 9px 10px;
+      color: var(--text);
+      background: var(--bg);
+      transition: .16s;
+    }
+    .search:focus { border-color: #1f6feb; box-shadow: 0 0 0 3px #1f6feb28; }
+    .topics { overflow-y: auto; padding: 7px 0 16px; }
+    .topic {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 37px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      color: var(--muted);
+      padding: 8px 13px;
+      font-size: 13px;
+      font-weight: 690;
+      transition: .12s;
+    }
+    .topic:hover { background: var(--surface-2); color: var(--text); }
+    .topic.active { border-left-color: var(--blue); background: #1f6feb15; color: var(--blue); }
+    .topic-badge { border-radius: 999px; background: var(--border); color: var(--muted); font-size: 10px; font-weight: 700; min-width: 21px; padding: 1px 6px; text-align: center; }
+    .topic.active .topic-badge { background: #1f6feb; color: white; }
+
+    .main { min-width: 0; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .main-head { min-height: 53px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 11px 26px; border-bottom: 1px solid #21262d; background: var(--surface); }
+    .main-head h1 { margin: 0; color: #f0f6fc; font-size: 18px; letter-spacing: .01em; }
+    .crumb { color: var(--muted); font-size: 13px; }
+    .crumb span { color: var(--orange); font-weight: 650; }
+    .content { overflow-y: auto; padding: 25px 29px 70px; }
+    .intro {
+      margin-bottom: 20px;
+      padding: 18px 20px;
+      border: 1px solid #1f6feb48;
+      border-radius: 9px;
+      background: linear-gradient(120deg, #1f6feb19, #161b22 62%);
+    }
+    .intro h2 { margin: 0 0 5px; color: var(--blue); font-size: 19px; }
+    .intro p { margin: 0; color: var(--text); }
+    .pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
+    .pill { border: 1px solid #30363d; border-radius: 999px; color: var(--muted); padding: 3px 9px; font-size: 11px; font-weight: 650; }
+    .pill.green { border-color: #23863680; color: var(--green); background: #3fb9500c; }
+    .pill.purple { border-color: #8957e580; color: var(--purple); background: #8957e50c; }
+    .section-title { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 10px; color: var(--blue); font-size: 16px; font-weight: 760; }
+    .section-title button { cursor: pointer; border: 1px solid var(--border); border-radius: 5px; background: transparent; color: var(--muted); font-size: 12px; padding: 4px 9px; }
+    .section-title button:hover { border-color: var(--blue); color: var(--blue); }
+
+    .question { overflow: hidden; margin: 7px 0; border: 1px solid #21262d; border-radius: 8px; background: var(--bg); transition: border-color .15s; }
+    .question:hover { border-color: #3b434c; }
+    .question.open { border-color: #1f6feb80; }
+    .q-btn { display: flex; align-items: center; width: 100%; gap: 10px; cursor: pointer; border: 0; background: transparent; padding: 11px 14px; text-align: left; }
+    .q-btn:hover { background: #161b22; }
+    .q-number { flex: 0 0 31px; color: #484f58; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
+    .q-title { flex: 1; color: var(--text); font-size: 14px; font-weight: 620; }
+    .q-arrow { color: #6e7681; font-size: 10px; transition: transform .16s; }
+    .question.open .q-arrow { color: var(--blue); transform: rotate(90deg); }
+    .level { border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 760; text-transform: uppercase; letter-spacing: .03em; }
+    .level.core { background: #1f6feb22; color: var(--blue); }
+    .level.common { background: #23863622; color: var(--green); }
+    .level.deep { background: #8957e522; color: var(--purple); }
+    .answer { display: none; border-top: 1px solid #21262d; padding: 15px 17px 17px; background: var(--surface); color: var(--text); }
+    .question.open .answer { display: block; }
+    .answer p { margin: 0 0 11px; }
+    .answer h4 { margin: 16px 0 6px; color: var(--orange); font-size: 13px; }
+    .answer h4:first-child { margin-top: 0; }
+    .answer ul { margin: 6px 0 12px; padding-left: 20px; }
+    .answer li { margin: 5px 0; }
+    .answer b, .answer code { color: #79c0ff; }
+    .answer code { border-radius: 4px; background: #0d1117; padding: 1px 4px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; }
+    .say { margin: 12px 0 0; border-left: 3px solid var(--green); border-radius: 0 5px 5px 0; padding: 9px 11px; color: #a5d6b4; background: #3fb9500d; font-size: 13px; }
+    .say strong { color: var(--green); }
+    .diagram { overflow-x: auto; margin: 10px 0; border: 1px solid #30363d; border-radius: 6px; padding: 12px; color: #c9d1d9; background: #0d1117; font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; }
+
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .overview-card { cursor: pointer; border: 1px solid #21262d; border-radius: 8px; padding: 15px; background: var(--surface); transition: .15s; }
+    .overview-card:hover { transform: translateY(-2px); border-color: #1f6feb80; background: var(--surface-2); }
+    .overview-card h3 { margin: 0 0 5px; color: var(--blue); font-size: 14px; }
+    .overview-card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .overview-card .mini { margin-top: 10px; color: var(--orange); font-size: 11px; font-weight: 700; }
+
+    .two-col { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: 15px; }
+    .card { border: 1px solid #21262d; border-radius: 8px; padding: 17px; background: var(--surface); }
+    .card h2 { margin: 0 0 10px; color: var(--blue); font-size: 16px; }
+    .card h3 { margin: 16px 0 5px; color: var(--orange); font-size: 13px; }
+    .card p { margin: 0; color: var(--text); }
+    .card ul { margin: 7px 0; padding-left: 19px; }
+    .card li { margin: 5px 0; }
+    .callout { margin-top: 12px; border-left: 3px solid var(--yellow); border-radius: 0 5px 5px 0; padding: 9px 11px; color: #e3c86c; background: #e3b3410d; font-size: 13px; }
+    .table-wrap { overflow-x: auto; border: 1px solid #30363d; border-radius: 7px; }
+    table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: 12px; }
+    th { background: #1f6feb; color: white; font-size: 11px; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
+    th, td { border-bottom: 1px solid #30363d; padding: 8px 10px; vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) { background: #0d1117; }
+    td strong { color: #79c0ff; }
+
+    .flash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 11px; }
+    .flash { min-height: 122px; cursor: pointer; perspective: 900px; }
+    .flash-inner { position: relative; height: 100%; min-height: 122px; border: 1px solid #30363d; border-radius: 8px; transform-style: preserve-3d; transition: transform .45s; }
+    .flash.flipped .flash-inner { transform: rotateY(180deg); }
+    .flash-face { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 16px; backface-visibility: hidden; border-radius: 8px; }
+    .flash-front { background: var(--surface); }
+    .flash-back { transform: rotateY(180deg); background: #102033; }
+    .flash-label { margin-bottom: 6px; color: var(--muted); font-size: 10px; font-weight: 760; text-transform: uppercase; letter-spacing: .07em; }
+    .flash-term { color: var(--blue); font-size: 16px; font-weight: 750; }
+    .flash-answer { color: var(--text); font-size: 13px; line-height: 1.5; }
+    .flash-hint { position: absolute; right: 12px; bottom: 9px; color: #6e7681; font-size: 10px; }
+    .empty { padding: 45px 16px; color: var(--muted); text-align: center; }
+    .overlay { display: none; }
+    .theme-control { display: flex; align-items: center; gap: 7px; margin-left: auto; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; font-weight: 750; letter-spacing: .05em; }
+    .theme-control > span { font-size: 12px; font-weight: 850; }
+    .theme-select { cursor: pointer; border: 1px solid var(--border); border-radius: 5px; outline: 0; background: var(--bg); color: var(--text); padding: 7px 8px; font: inherit; font-size: 11px; }
+    .theme-select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #1f6feb30; }
+
+    @media (max-width: 800px) {
+      body { overflow: hidden; }
+      .tabbar { height: 48px; padding: 0 5px; }
+      .brand { margin-right: 6px; font-size: 13px; }
+      .brand-mark { font-size: 17px; }
+      .tab-btn { padding: 13px 9px 11px; font-size: 11px; }
+      .mobile-menu { display: block; height: 48px; }
+      .page { position: relative; }
+      .sidebar { position: fixed; top: 48px; bottom: 0; left: 0; width: 282px; flex-basis: 282px; transform: translateX(-105%); transition: transform .22s ease; box-shadow: 5px 0 28px rgba(0,0,0,.4); }
+      .sidebar.open { transform: translateX(0); }
+      .overlay.open { position: fixed; z-index: 8; display: block; inset: 48px 0 0; background: rgba(0,0,0,.57); }
+      .main-head { min-height: 48px; padding: 9px 14px; }
+      .main-head h1 { font-size: 15px; }
+      .crumb { display: none; }
+      .content { padding: 15px 13px 48px; }
+      .intro { padding: 14px; }
+      .intro h2 { font-size: 17px; }
+      .two-col { grid-template-columns: 1fr; }
+      .q-btn { padding: 10px; gap: 7px; }
+      .q-title { font-size: 13px; }
+      .level { display: none; }
+      .answer { padding: 13px; }
+      .theme-control { gap: 4px; margin-left: 2px; }
+      .theme-control > span { display: none; }
+      .theme-select { max-width: 92px; padding: 6px; font-size: 10px; }
+    }
+  </style>
+
+  <style id="brutalistTheme" media="not all">
+    /* ===== BRUTALIST VISUAL SYSTEM ===== */
+    :root {
+      --bg: #f6f1e7;
+      --surface: #ffffff;
+      --surface-2: #e7e1d5;
+      --border: #050505;
+      --text: #050505;
+      --muted: #292929;
+      --blue: #0047ff;
+      --green: #00b86b;
+      --orange: #ff4d00;
+      --yellow: #ffd400;
+      --purple: #9c27ff;
+      --red: #ff1744;
+    }
+    * { border-radius: 0 !important; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Arial Narrow", Impact, Haettenschweiler, "Franklin Gothic Condensed", Arial, sans-serif;
+      font-size: 15px;
+      letter-spacing: .015em;
+      -webkit-font-smoothing: auto;
+    }
+    .tabbar {
+      gap: 7px;
+      height: 64px;
+      padding: 7px 12px;
+      overflow: visible;
+      background: var(--yellow);
+      border-bottom: 4px solid var(--border);
+      box-shadow: none;
+    }
+    .brand {
+      align-self: stretch;
+      gap: 8px;
+      margin-right: 10px;
+      padding: 0 13px;
+      color: #fff;
+      background: #050505;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .brand-mark { color: var(--yellow); font-size: 22px; }
+    .tab-btn {
+      min-height: 43px;
+      border: 3px solid var(--border);
+      border-bottom: 3px solid var(--border);
+      background: #fff;
+      color: #050505;
+      box-shadow: 3px 3px 0 var(--border);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .07em;
+      padding: 11px 12px;
+      text-transform: uppercase;
+      transition: transform .08s, box-shadow .08s, background .08s;
+    }
+    .tab-btn:hover { background: #ff9d00; color: #050505; }
+    .tab-btn:active { box-shadow: 0 0 0 var(--border); transform: translate(3px, 3px); }
+    .tab-btn.active { border-color: var(--border); background: var(--orange); color: #fff; }
+    .mobile-menu {
+      border: 3px solid var(--border);
+      background: #fff;
+      color: #050505;
+      font-weight: 900;
+    }
+    .theme-control { align-self: stretch; gap: 6px; color: #050505; font-family: ui-monospace, monospace; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+    .theme-select { cursor: pointer; border: 3px solid var(--border); background: #fff; color: #050505; box-shadow: 3px 3px 0 var(--border); font-family: inherit; font-size: 10px; font-weight: 900; letter-spacing: .04em; outline: 0; padding: 8px; text-transform: uppercase; }
+    .theme-select:focus { border-color: var(--border); box-shadow: 4px 4px 0 var(--orange); }
+    .sidebar {
+      background: #20d6e5;
+      border-right: 4px solid var(--border);
+    }
+    .sidebar-head { padding: 15px 12px; border-bottom: 4px solid var(--border); background: #20d6e5; }
+    .sidebar-title { color: #050505; font-size: 17px; font-weight: 900; letter-spacing: .055em; text-transform: uppercase; }
+    .count { border: 2px solid var(--border); background: #fff; color: #050505; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 900; padding: 2px 7px; }
+    .search {
+      border: 3px solid var(--border);
+      background: #fff;
+      color: #050505;
+      box-shadow: 3px 3px 0 var(--border);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .search:focus { border-color: var(--border); box-shadow: 5px 5px 0 var(--orange); }
+    .topics { padding: 8px 0 20px; }
+    .topic {
+      min-height: 43px;
+      margin: 0 8px 7px;
+      border: 3px solid var(--border);
+      border-left: 3px solid var(--border);
+      background: #fff;
+      color: #050505;
+      box-shadow: 3px 3px 0 var(--border);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+    .topic:hover { background: var(--yellow); color: #050505; }
+    .topic.active { border-left-color: var(--border); background: var(--red); color: #fff; }
+    .topic-badge, .topic.active .topic-badge { border: 2px solid var(--border); background: #050505; color: #fff; font-family: ui-monospace, monospace; font-size: 10px; font-weight: 900; }
+    .topic.active .topic-badge { background: #fff; color: #050505; }
+    .main-head {
+      min-height: 64px;
+      padding: 12px 24px;
+      border-bottom: 4px solid var(--border);
+      background: #fff;
+    }
+    .main-head h1 { color: #050505; font-size: 24px; font-weight: 900; letter-spacing: .035em; text-transform: uppercase; }
+    .crumb { color: #050505; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; font-weight: 700; }
+    .crumb span { color: var(--orange); }
+    .content { padding: 24px; background-color: var(--bg); background-image: radial-gradient(#c7c0b1 1px, transparent 1px); background-size: 12px 12px; }
+    .intro {
+      border: 4px solid var(--border);
+      background: var(--orange);
+      color: #050505;
+      box-shadow: 7px 7px 0 var(--border);
+      margin: 0 7px 25px 0;
+      padding: 18px;
+    }
+    .intro h2 { color: #050505; font-size: 25px; font-weight: 900; letter-spacing: .025em; text-transform: uppercase; }
+    .intro p { color: #050505; font-family: Arial, sans-serif; font-weight: 700; }
+    .pills { gap: 7px; }
+    .pill, .pill.green, .pill.purple {
+      border: 2px solid var(--border);
+      background: #fff;
+      color: #050505;
+      font-family: ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .pill.green { background: #00e58b; }
+    .pill.purple { background: #d0a5ff; }
+    .two-col { gap: 18px; }
+    .card {
+      border: 4px solid var(--border);
+      background: #fff;
+      box-shadow: 6px 6px 0 var(--border);
+      padding: 17px;
+    }
+    .card h2, .section-title { color: #050505; font-size: 19px; font-weight: 900; letter-spacing: .045em; text-transform: uppercase; }
+    .card h2 { border-bottom: 3px solid var(--border); padding-bottom: 7px; }
+    .card h3, .answer h4 { color: #050505; font-family: ui-monospace, monospace; font-size: 12px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+    .card p, .card li { color: #050505; font-family: Arial, sans-serif; font-size: 14px; }
+    .card li::marker, .answer li::marker { color: var(--orange); }
+    .table-wrap { border: 3px solid var(--border); }
+    table { font-family: Arial, sans-serif; }
+    th { background: var(--blue); color: #fff; font-family: inherit; font-size: 11px; font-weight: 900; }
+    th, td { border-color: var(--border); padding: 9px 10px; }
+    tbody tr:nth-child(even) { background: #f3eddf; }
+    td strong, .answer b, .answer code { color: var(--blue); }
+    .diagram { border: 3px solid var(--border); background: #050505; color: #fff; box-shadow: 3px 3px 0 var(--blue); font-size: 12px; }
+    .callout { border: 3px solid var(--border); border-left: 9px solid var(--border); background: var(--yellow); color: #050505; font-family: Arial, sans-serif; font-weight: 700; }
+    .section-title { margin: 25px 0 14px; }
+    .section-title button {
+      border: 3px solid var(--border);
+      background: #fff;
+      color: #050505;
+      box-shadow: 3px 3px 0 var(--border);
+      font-family: inherit;
+      font-weight: 900;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+    }
+    .question {
+      border: 4px solid var(--border);
+      background: #fff;
+      box-shadow: 5px 5px 0 var(--border);
+      margin: 0 5px 14px 0;
+    }
+    .question:hover, .question.open { border-color: var(--border); }
+    .q-btn { background: #fff; padding: 12px 13px; }
+    .q-btn:hover { background: var(--yellow); }
+    .q-number { color: #050505; font-weight: 900; }
+    .q-title { color: #050505; font-family: Arial, sans-serif; font-size: 15px; font-weight: 800; }
+    .q-arrow { color: #050505; font-size: 12px; }
+    .level, .level.core, .level.common, .level.deep { border: 2px solid var(--border); background: #fff; color: #050505; font-family: ui-monospace, monospace; font-size: 9px; font-weight: 900; }
+    .level.core { background: #8db8ff; }
+    .level.common { background: #7ff0b6; }
+    .level.deep { background: #d9b8ff; }
+    .answer { border-top: 4px solid var(--border); background: #fff; color: #050505; font-family: Arial, sans-serif; }
+    .answer p, .answer li { color: #050505; }
+    .say { border: 3px solid var(--border); border-left: 8px solid var(--border); background: #00e58b; color: #050505; font-family: Arial, sans-serif; font-weight: 700; }
+    .say strong { color: #050505; }
+    .overview-card { border: 4px solid var(--border); background: #fff; box-shadow: 5px 5px 0 var(--border); }
+    .overview-card:hover { transform: translate(-2px, -2px); border-color: var(--border); background: var(--yellow); box-shadow: 7px 7px 0 var(--border); }
+    .overview-card h3, .overview-card .mini { color: #050505; font-weight: 900; text-transform: uppercase; }
+    .overview-card p { color: #050505; font-family: Arial, sans-serif; }
+    .flash-inner { border: 4px solid var(--border); box-shadow: 5px 5px 0 var(--border); }
+    .flash-front { background: #fff; }
+    .flash-back { background: var(--blue); color: #fff; }
+    .flash-label { color: #050505; font-family: ui-monospace, monospace; font-weight: 900; }
+    .flash-back .flash-label, .flash-back .flash-answer { color: #fff; }
+    .flash-term { color: #050505; font-family: inherit; font-size: 20px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+    .flash-answer { font-family: Arial, sans-serif; font-weight: 700; }
+    .flash-hint { color: #050505; font-family: ui-monospace, monospace; font-weight: 700; }
+    .flash-back .flash-hint { color: #fff; }
+    .empty { border: 3px solid var(--border); background: #fff; color: #050505; font-family: ui-monospace, monospace; font-weight: 800; }
+    @media (max-width: 800px) {
+      .tabbar { gap: 5px; height: 55px; padding: 5px; overflow-x: auto; }
+      .brand { display: none; }
+      .mobile-menu { height: 42px; flex-basis: 42px; }
+      .tab-btn { min-height: 40px; padding: 9px 8px; font-size: 10px; }
+      .sidebar { top: 55px; border-right: 4px solid var(--border); }
+      .overlay.open { inset: 55px 0 0; }
+      .main-head { min-height: 55px; border-bottom-width: 4px; }
+      .main-head h1 { font-size: 17px; }
+      .content { padding: 15px 14px 45px; }
+      .intro h2 { font-size: 20px; }
+      .card, .question { box-shadow: 4px 4px 0 var(--border); }
+    }
+  </style>
+  <style id="swissTheme" media="not all">
+    /* ===== SWISS DESIGN ===== */
+    :root { --bg:#f7f7f4; --surface:#fff; --surface-2:#ecece7; --border:#111; --text:#111; --muted:#555; --blue:#0057ff; --green:#008f5b; --orange:#e31b23; --yellow:#ffd500; --purple:#6c3cff; --red:#e31b23; }
+    body { background:var(--bg); color:#111; font-family:Helvetica, Arial, sans-serif; letter-spacing:0; }
+    .tabbar { height:58px; gap:0; padding:0 18px; background:#fff; border-bottom:3px solid #111; box-shadow:none; }
+    .brand { align-self:stretch; margin-right:18px; padding:0 14px; background:#111; color:#fff; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .brand-mark { color:#e31b23; }
+    .tab-btn { align-self:stretch; border:0; border-bottom:5px solid transparent; border-radius:0; background:transparent; color:#111; font-family:inherit; font-size:12px; font-weight:800; letter-spacing:.045em; padding:0 13px; text-transform:uppercase; }
+    .tab-btn:hover { background:#ededeb; color:#111; }
+    .tab-btn.active { border-bottom-color:#e31b23; background:transparent; color:#111; }
+    .theme-control { margin-left:auto; color:#111; }
+    .theme-select { border:2px solid #111; border-radius:0; background:#fff; color:#111; font-family:inherit; font-weight:700; }
+    .sidebar { background:#e31b23; border-right:3px solid #111; }
+    .sidebar-head { border-bottom:3px solid #111; background:#e31b23; }
+    .sidebar-title { color:#fff; font-size:15px; font-weight:900; letter-spacing:.055em; text-transform:uppercase; }
+    .count { border-radius:0; background:#fff; color:#111; font-weight:800; }
+    .search { border:2px solid #111; border-radius:0; background:#fff; color:#111; box-shadow:none; }
+    .topic { margin:0; border:0; border-bottom:1px solid #111; border-left:5px solid transparent; border-radius:0; color:#111; font-weight:750; }
+    .topic:hover { background:#fff; color:#111; }
+    .topic.active { border-left-color:#111; background:#111; color:#fff; }
+    .topic-badge { border-radius:0; background:#fff; color:#111; font-weight:800; }
+    .topic.active .topic-badge { background:#e31b23; color:#fff; }
+    .main-head { min-height:58px; border-bottom:3px solid #111; background:#fff; }
+    .main-head h1 { color:#111; font-size:23px; font-weight:900; letter-spacing:-.04em; text-transform:uppercase; }
+    .crumb { color:#555; } .crumb span { color:#e31b23; }
+    .content { padding:30px; background:#f7f7f4; }
+    .intro { border:3px solid #111; border-left:18px solid #e31b23; border-radius:0; background:#fff; box-shadow:none; }
+    .intro h2,.section-title,.card h2 { color:#111; font-weight:900; letter-spacing:-.025em; text-transform:uppercase; }
+    .pill,.pill.green,.pill.purple { border:1px solid #111; border-radius:0; background:#fff; color:#111; font-weight:750; }
+    .two-col { gap:20px; }
+    .card,.question { border:2px solid #111; border-radius:0; background:#fff; box-shadow:none; }
+    .card { padding:18px; } .card h2 { border-bottom:2px solid #111; padding-bottom:7px; }
+    .table-wrap,.diagram { border:2px solid #111; border-radius:0; } .diagram { background:#111; box-shadow:none; }
+    th { background:#0057ff; } th,td { border-color:#111; } tbody tr:nth-child(even) { background:#f0f0ed; }
+    .callout { border-left:7px solid #e31b23; border-radius:0; background:#fff6bd; color:#111; }
+    .section-title button { border:2px solid #111; border-radius:0; background:#fff; color:#111; }
+    .q-btn:hover { background:#f0f0ed; } .question.open { border-color:#0057ff; }
+    .level { border-radius:0; } .answer { background:#fff; }
+    .say { border-left-color:#0057ff; border-radius:0; background:#e4edff; color:#111; }
+    .flash-inner { border:2px solid #111; border-radius:0; box-shadow:none; } .flash-face { border-radius:0; }
+    .flash-front { background:#fff; } .flash-back { background:#e31b23; } .flash-back .flash-label,.flash-back .flash-answer,.flash-back .flash-hint { color:#fff; }
+  </style>
+  <style id="editorialTheme" media="not all">
+    /* ===== EDITORIAL ===== */
+    :root { --bg:#f4efe5; --surface:#fffdf8; --surface-2:#ece3d4; --border:#30251e; --text:#30251e; --muted:#76675a; --blue:#274b70; --green:#3d6b56; --orange:#a83c2d; --yellow:#c89129; --purple:#66466e; --red:#a83c2d; }
+    body { background:var(--bg); color:var(--text); font-family:Georgia, "Times New Roman", serif; letter-spacing:0; }
+    .tabbar { height:62px; padding:0 20px; background:#fffdf8; border-bottom:1px solid #30251e; box-shadow:none; }
+    .brand { margin-right:18px; color:#30251e; background:transparent; font-family:Georgia,serif; font-size:17px; font-weight:700; letter-spacing:-.025em; }
+    .brand-mark { color:#a83c2d; font-size:17px; }
+    .tab-btn { border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; color:#76675a; font-family:Georgia,serif; font-size:13px; font-weight:700; padding:18px 12px 15px; }
+    .tab-btn:hover { background:#f4efe5; color:#30251e; } .tab-btn.active { border-bottom-color:#a83c2d; background:transparent; color:#30251e; }
+    .theme-control { color:#76675a; font-family:Georgia,serif; font-size:11px; }
+    .theme-select { border:1px solid #76675a; border-radius:0; background:#fffdf8; color:#30251e; font-family:Georgia,serif; }
+    .sidebar { background:#30251e; border-right:1px solid #30251e; } .sidebar-head { border-bottom:1px solid #76675a; background:#30251e; }
+    .sidebar-title { color:#f6df9a; font-family:Georgia,serif; font-size:16px; font-weight:700; letter-spacing:0; text-transform:none; }
+    .count { border-radius:99px; background:#f6df9a; color:#30251e; } .search { border:1px solid #76675a; border-radius:2px; background:#fffdf8; color:#30251e; box-shadow:none; font-family:Georgia,serif; }
+    .topic { border-left:2px solid transparent; border-radius:0; color:#e6dccc; font-family:Georgia,serif; font-size:13px; font-weight:600; }
+    .topic:hover { background:#44372f; color:#fffdf8; } .topic.active { border-left-color:#f6df9a; background:#44372f; color:#f6df9a; }
+    .topic-badge { border-radius:99px; background:#76675a; color:#fffdf8; } .topic.active .topic-badge { background:#f6df9a; color:#30251e; }
+    .main-head { min-height:62px; border-bottom:1px solid #c9bca9; background:#fffdf8; } .main-head h1 { color:#30251e; font-family:Georgia,serif; font-size:25px; font-weight:700; letter-spacing:-.035em; } .crumb { color:#76675a; font-family:Georgia,serif; } .crumb span { color:#a83c2d; }
+    .content { padding:34px; background:#f4efe5; } .intro { border:1px solid #c9bca9; border-radius:0; background:#fffdf8; box-shadow:none; } .intro h2,.section-title,.card h2 { color:#30251e; font-family:Georgia,serif; font-weight:700; letter-spacing:-.025em; } .intro p,.card p,.card li,.answer { font-family:Georgia,serif; }
+    .pill,.pill.green,.pill.purple { border:1px solid #c9bca9; border-radius:99px; background:#fffdf8; color:#76675a; font-family:Georgia,serif; }
+    .card,.question { border:1px solid #c9bca9; border-radius:0; background:#fffdf8; box-shadow:none; } .card h2 { border-bottom:1px solid #c9bca9; padding-bottom:8px; } .card h3,.answer h4 { color:#a83c2d; font-family:Georgia,serif; }
+    .table-wrap,.diagram { border:1px solid #c9bca9; border-radius:0; } .diagram { background:#30251e; box-shadow:none; } th { background:#274b70; } th,td { border-color:#d9cdbd; } tbody tr:nth-child(even) { background:#f7f0e5; }
+    .callout { border-left-color:#a83c2d; border-radius:0; background:#f9eed6; color:#30251e; } .section-title button { border:1px solid #76675a; border-radius:0; background:#fffdf8; color:#30251e; font-family:Georgia,serif; }
+    .question.open { border-color:#a83c2d; } .q-btn:hover { background:#f7f0e5; } .q-title { font-family:Georgia,serif; } .level { border-radius:99px; } .answer { background:#fffdf8; }
+    .say { border-left-color:#3d6b56; border-radius:0; background:#e6f0e9; color:#30251e; } .flash-inner,.flash-face { border-radius:0; } .flash-inner { border:1px solid #c9bca9; box-shadow:none; } .flash-front { background:#fffdf8; } .flash-back { background:#66466e; }
+  </style>
+  <style id="retroTheme" media="not all">
+    /* ===== RETRO ===== */
+    :root { --bg:#f5e9c9; --surface:#fff8df; --surface-2:#f4d77c; --border:#263238; --text:#263238; --muted:#5c5b50; --blue:#167d9a; --green:#237c62; --orange:#d44b32; --yellow:#f2b134; --purple:#6c5a96; --red:#d44b32; }
+    body { background:var(--bg); color:var(--text); font-family:"Trebuchet MS", Arial, sans-serif; letter-spacing:.01em; }
+    .tabbar { height:62px; gap:6px; padding:7px 14px; background:#167d9a; border-bottom:4px solid #263238; box-shadow:0 4px 0 #263238; } .brand { align-self:stretch; margin-right:10px; padding:0 11px; background:#f2b134; color:#263238; font-size:14px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; } .brand-mark { color:#d44b32; }
+    .tab-btn { border:2px solid #263238; border-bottom:2px solid #263238; border-radius:7px; background:#fff8df; color:#263238; box-shadow:2px 2px 0 #263238; font-family:inherit; font-size:11px; font-weight:900; padding:9px 11px; text-transform:uppercase; } .tab-btn:hover { background:#f2b134; color:#263238; } .tab-btn.active { background:#d44b32; color:#fff8df; }
+    .theme-control { color:#fff8df; font-family:inherit; font-weight:900; } .theme-select { border:2px solid #263238; border-radius:5px; background:#fff8df; color:#263238; box-shadow:2px 2px 0 #263238; font-family:inherit; font-weight:900; }
+    .sidebar { background:#f2b134; border-right:4px solid #263238; } .sidebar-head { background:#f2b134; border-bottom:4px solid #263238; } .sidebar-title { color:#263238; font-size:16px; font-weight:900; text-transform:uppercase; } .count { border:2px solid #263238; border-radius:5px; background:#fff8df; color:#263238; font-weight:900; } .search { border:2px solid #263238; border-radius:5px; background:#fff8df; color:#263238; box-shadow:2px 2px 0 #263238; font-family:inherit; }
+    .topic { margin:0 6px 6px; border:2px solid #263238; border-left:2px solid #263238; border-radius:6px; background:#fff8df; color:#263238; box-shadow:2px 2px 0 #263238; font-weight:800; } .topic:hover { background:#ffdd78; color:#263238; } .topic.active { border-left-color:#263238; background:#d44b32; color:#fff8df; } .topic-badge,.topic.active .topic-badge { border-radius:99px; background:#263238; color:#fff8df; } .topic.active .topic-badge { background:#fff8df; color:#263238; }
+    .main-head { min-height:62px; border-bottom:4px solid #263238; background:#fff8df; } .main-head h1 { color:#263238; font-size:22px; font-weight:900; text-transform:uppercase; } .crumb { color:#5c5b50; } .crumb span { color:#d44b32; } .content { background:#f5e9c9; }
+    .intro { border:3px solid #263238; border-radius:9px; background:#ffdd78; box-shadow:5px 5px 0 #263238; } .intro h2,.section-title,.card h2 { color:#263238; font-weight:900; text-transform:uppercase; } .pill,.pill.green,.pill.purple { border:2px solid #263238; border-radius:99px; background:#fff8df; color:#263238; font-weight:800; }
+    .card,.question { border:3px solid #263238; border-radius:9px; background:#fff8df; box-shadow:4px 4px 0 #263238; } .card h2 { border-bottom:2px dashed #263238; padding-bottom:7px; } .table-wrap,.diagram { border:2px solid #263238; border-radius:6px; } .diagram { background:#263238; box-shadow:none; } th { background:#167d9a; } th,td { border-color:#263238; } tbody tr:nth-child(even) { background:#f5e9c9; } .callout { border-left:7px solid #d44b32; border-radius:6px; background:#ffe5a4; color:#263238; }
+    .section-title button { border:2px solid #263238; border-radius:5px; background:#fff8df; color:#263238; box-shadow:2px 2px 0 #263238; font-family:inherit; font-weight:900; } .q-btn:hover { background:#ffedb7; } .question.open { border-color:#167d9a; } .level { border:1px solid #263238; border-radius:99px; } .answer { background:#fff8df; } .say { border-left-color:#237c62; border-radius:6px; background:#d6efd4; color:#263238; }
+    .flash-inner,.flash-face { border-radius:8px; } .flash-inner { border:3px solid #263238; box-shadow:4px 4px 0 #263238; } .flash-front { background:#fff8df; } .flash-back { background:#6c5a96; }
+  </style>
+  <style id="cyberpunkTheme" media="not all">
+    /* ===== CYBERPUNK ===== */
+    :root { --bg:#000000; --surface:#120107; --surface-2:#25030c; --border:#55ead4; --text:#ffffff; --muted:#f3e600; --blue:#55ead4; --green:#55ead4; --orange:#f3e600; --yellow:#f3e600; --purple:#c5003c; --red:#c5003c; }
+    body { background:#000000; color:#ffffff; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing:.015em; } .tabbar { height:60px; padding:0 14px; background:#000000; border-bottom:2px solid #55ead4; box-shadow:0 3px 18px #55ead455; } .brand { align-self:stretch; margin-right:13px; padding:0 12px; background:#c5003c; color:#ffffff; font-family:inherit; font-size:12px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; } .brand-mark { color:#f3e600; }
+    .tab-btn { border:1px solid #880425; border-bottom:1px solid #880425; border-radius:0; background:#000000; color:#f3e600; font-family:inherit; font-size:11px; font-weight:800; padding:10px 11px; text-transform:uppercase; } .tab-btn:hover { background:#880425; color:#55ead4; } .tab-btn.active { border-color:#55ead4; background:#c5003c33; color:#55ead4; box-shadow:inset 0 -2px #55ead4; }
+    .theme-control { color:#55ead4; font-family:inherit; } .theme-select { border:1px solid #55ead4; border-radius:0; background:#000000; color:#55ead4; font-family:inherit; box-shadow:0 0 8px #55ead455; }
+    .sidebar { background:#000000; border-right:1px solid #880425; } .sidebar-head { background:#880425; border-bottom:1px solid #55ead4; } .sidebar-title { color:#f3e600; font-family:inherit; font-size:14px; letter-spacing:.05em; text-transform:uppercase; } .count { border:1px solid #c5003c; border-radius:0; background:#000000; color:#ffffff; } .search { border:1px solid #55ead4; border-radius:0; background:#000000; color:#ffffff; box-shadow:none; font-family:inherit; } .search:focus { border-color:#f3e600; box-shadow:0 0 8px #f3e60066; }
+    .topic { border-left:3px solid transparent; border-radius:0; color:#f3e600; font-family:inherit; font-size:12px; font-weight:700; } .topic:hover { background:#880425; color:#55ead4; } .topic.active { border-left-color:#55ead4; background:#c5003c33; color:#55ead4; } .topic-badge { border-radius:0; background:#c5003c; color:#ffffff; } .topic.active .topic-badge { background:#f3e600; color:#000000; }
+    .main-head { min-height:60px; border-bottom:1px solid #880425; background:#000000; } .main-head h1 { color:#ffffff; font-family:inherit; font-size:21px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; } .crumb { color:#f3e600; font-family:inherit; } .crumb span { color:#55ead4; } .content { background-color:#000000; background-image:linear-gradient(#88042566 1px, transparent 1px),linear-gradient(90deg,#88042566 1px,transparent 1px); background-size:20px 20px; }
+    .intro { border:1px solid #55ead4; border-radius:0; background:#120107; box-shadow:5px 5px 0 #c5003c; } .intro h2,.section-title,.card h2 { color:#55ead4; font-family:inherit; font-weight:900; letter-spacing:.04em; text-transform:uppercase; } .intro p,.card p,.card li { color:#ffffff; } .pill,.pill.green,.pill.purple { border:1px solid #880425; border-radius:0; background:#25030c; color:#ffffff; font-family:inherit; }
+    .card,.question { border:1px solid #880425; border-radius:0; background:#120107; box-shadow:3px 3px 0 #88042599; } .card h2 { border-bottom:1px solid #880425; padding-bottom:8px; } .card h3,.answer h4 { color:#f3e600; font-family:inherit; } .table-wrap,.diagram { border:1px solid #880425; border-radius:0; } .diagram { background:#000000; box-shadow:0 0 10px #55ead455; } th { background:#c5003c; } th,td { border-color:#880425; } tbody tr:nth-child(even) { background:#25030c; } .callout { border-left:5px solid #f3e600; border-radius:0; background:#f3e60013; color:#ffffff; }
+    .section-title button { border:1px solid #55ead4; border-radius:0; background:#000000; color:#55ead4; font-family:inherit; } .q-btn:hover { background:#25030c; } .question.open { border-color:#55ead4; } .q-title { color:#ffffff; font-family:inherit; } .level { border-radius:0; } .answer { background:#120107; color:#ffffff; } .say { border-left-color:#55ead4; border-radius:0; background:#55ead413; color:#ffffff; }
+    .flash-inner,.flash-face { border-radius:0; } .flash-inner { border:1px solid #55ead4; box-shadow:3px 3px 0 #c5003c; } .flash-front { background:#120107; } .flash-back { background:#c5003c; } .flash-label,.flash-term { font-family:inherit; } .flash-term { color:#55ead4; } .flash-back .flash-label,.flash-back .flash-answer,.flash-back .flash-hint { color:#ffffff; }
+  </style>
+  <style id="glassTheme" media="not all">
+    /* ===== GLASSMORPHISM ===== */
+    :root { --bg:#0b1226; --surface:rgba(255,255,255,.12); --surface-2:rgba(255,255,255,.19); --border:rgba(255,255,255,.35); --text:#f8fbff; --muted:#c5d3e9; --blue:#8cc8ff; --green:#84f0c6; --orange:#ffba7a; --yellow:#ffe68a; --purple:#d2a8ff; --red:#ff9fb3; }
+    body { background:radial-gradient(circle at 12% 9%, #326bd8 0, transparent 29%), radial-gradient(circle at 89% 16%, #a058c7 0, transparent 27%), radial-gradient(circle at 52% 100%, #007f7c 0, transparent 43%), #0b1226; color:#f8fbff; font-family:Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing:0; }
+    .tabbar { height:62px; padding:0 16px; background:rgba(9,16,38,.54); border-bottom:1px solid rgba(255,255,255,.28); box-shadow:0 10px 30px rgba(0,0,0,.18); backdrop-filter:blur(18px) saturate(150%); -webkit-backdrop-filter:blur(18px) saturate(150%); }
+    .brand { margin-right:17px; color:#fff; background:transparent; font-size:15px; font-weight:800; letter-spacing:.01em; } .brand-mark { color:#8cc8ff; }
+    .tab-btn { border:1px solid transparent; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; background:transparent; color:#c5d3e9; font-family:inherit; font-size:12px; font-weight:700; padding:13px 12px; } .tab-btn:hover { background:rgba(255,255,255,.1); color:#fff; } .tab-btn.active { border-bottom-color:#8cc8ff; background:rgba(140,200,255,.12); color:#fff; }
+    .theme-control { color:#dbe8fa; font-family:inherit; font-size:10px; } .theme-select { border:1px solid rgba(255,255,255,.35); border-radius:7px; background:rgba(8,16,37,.45); color:#fff; font-family:inherit; backdrop-filter:blur(10px); }
+    .sidebar { background:rgba(9,16,38,.42); border-right:1px solid rgba(255,255,255,.2); backdrop-filter:blur(18px) saturate(135%); -webkit-backdrop-filter:blur(18px) saturate(135%); } .sidebar-head { background:rgba(255,255,255,.08); border-bottom:1px solid rgba(255,255,255,.2); } .sidebar-title { color:#fff; font-size:15px; font-weight:800; } .count { border:1px solid rgba(255,255,255,.35); border-radius:99px; background:rgba(255,255,255,.18); color:#fff; } .search { border:1px solid rgba(255,255,255,.32); border-radius:7px; background:rgba(2,7,22,.34); color:#fff; box-shadow:none; } .search::placeholder { color:#c5d3e9; } .search:focus { border-color:#8cc8ff; box-shadow:0 0 0 3px #8cc8ff33; }
+    .topic { border-left:3px solid transparent; border-radius:0; color:#d7e2f3; font-family:inherit; font-size:13px; font-weight:650; } .topic:hover { background:rgba(255,255,255,.11); color:#fff; } .topic.active { border-left-color:#8cc8ff; background:rgba(140,200,255,.18); color:#fff; } .topic-badge { border-radius:99px; background:rgba(255,255,255,.18); color:#fff; } .topic.active .topic-badge { background:#8cc8ff; color:#0b1226; }
+    .main-head { min-height:62px; border-bottom:1px solid rgba(255,255,255,.18); background:rgba(9,16,38,.4); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); } .main-head h1 { color:#fff; font-size:20px; font-weight:800; } .crumb { color:#c5d3e9; } .crumb span { color:#ffdf9e; } .content { background:transparent; }
+    .intro { border:1px solid rgba(255,255,255,.31); border-radius:15px; background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.07)); box-shadow:0 14px 32px rgba(0,0,0,.18); backdrop-filter:blur(18px) saturate(140%); -webkit-backdrop-filter:blur(18px) saturate(140%); } .intro h2,.section-title,.card h2 { color:#fff; font-weight:800; } .intro p,.card p,.card li,.answer { color:#eef6ff; } .pill,.pill.green,.pill.purple { border:1px solid rgba(255,255,255,.32); border-radius:99px; background:rgba(255,255,255,.12); color:#fff; font-family:inherit; }
+    .card,.question { border:1px solid rgba(255,255,255,.28); border-radius:13px; background:rgba(255,255,255,.11); box-shadow:0 12px 25px rgba(0,0,0,.14); backdrop-filter:blur(14px) saturate(130%); -webkit-backdrop-filter:blur(14px) saturate(130%); } .card h2 { border-bottom:1px solid rgba(255,255,255,.25); padding-bottom:8px; } .card h3,.answer h4 { color:#ffdf9e; } .table-wrap,.diagram { border:1px solid rgba(255,255,255,.28); border-radius:8px; } .diagram { background:rgba(2,7,22,.65); box-shadow:none; } th { background:rgba(72,117,204,.72); } th,td { border-color:rgba(255,255,255,.22); } tbody tr:nth-child(even) { background:rgba(255,255,255,.06); } .callout { border-left-color:#84f0c6; border-radius:0 8px 8px 0; background:rgba(132,240,198,.12); color:#effff8; }
+    .section-title button { border:1px solid rgba(255,255,255,.35); border-radius:7px; background:rgba(255,255,255,.1); color:#fff; font-family:inherit; } .q-btn:hover { background:rgba(255,255,255,.11); } .question.open { border-color:#8cc8ff; } .q-title { color:#fff; font-family:inherit; } .level { border-radius:99px; } .answer { background:rgba(4,11,31,.25); } .say { border-left-color:#84f0c6; border-radius:0 8px 8px 0; background:rgba(132,240,198,.13); color:#effff8; }
+    .flash-inner,.flash-face { border-radius:13px; } .flash-inner { border:1px solid rgba(255,255,255,.32); box-shadow:0 12px 25px rgba(0,0,0,.16); } .flash-front { background:rgba(255,255,255,.14); } .flash-back { background:linear-gradient(135deg,rgba(137,85,205,.82),rgba(45,112,190,.86)); } .flash-label,.flash-term { font-family:inherit; } .flash-term { color:#fff; } .flash-back .flash-label,.flash-back .flash-answer,.flash-back .flash-hint { color:#fff; }
+  </style>
+  <style id="maximalismTheme" media="not all">
+    /* ===== MAXIMALISM ===== */
+    :root { --bg:#ffedf6; --surface:#fffdf4; --surface-2:#ffe26a; --border:#20113c; --text:#20113c; --muted:#594a73; --blue:#00a8e8; --green:#00a878; --orange:#ff641d; --yellow:#ffdd28; --purple:#9633df; --red:#ed1767; }
+    body { background-color:#ffedf6; background-image:radial-gradient(#ed1767 1.3px,transparent 1.3px),radial-gradient(#00a8e8 1.3px,transparent 1.3px); background-position:0 0,8px 8px; background-size:16px 16px; color:#20113c; font-family:"Trebuchet MS",Arial,sans-serif; letter-spacing:.01em; }
+    .tabbar { height:66px; gap:7px; padding:7px 15px; background:linear-gradient(90deg,#ffdd28 0 25%,#00d0ce 25% 50%,#ed1767 50% 75%,#9633df 75%); border-bottom:4px solid #20113c; box-shadow:0 5px 0 #20113c; } .brand { align-self:stretch; margin-right:8px; padding:0 13px; background:#20113c; color:#fffdf4; font-size:14px; font-weight:900; letter-spacing:.055em; text-transform:uppercase; transform:rotate(-1deg); } .brand-mark { color:#ffdd28; }
+    .tab-btn { border:3px solid #20113c; border-bottom:3px solid #20113c; border-radius:10px 2px 10px 2px; background:#fffdf4; color:#20113c; box-shadow:3px 3px 0 #20113c; font-family:inherit; font-size:11px; font-weight:900; padding:10px 11px; text-transform:uppercase; } .tab-btn:nth-of-type(2n) { transform:rotate(.8deg); } .tab-btn:hover { background:#ffdd28; color:#20113c; } .tab-btn.active { background:#ed1767; color:#fff; }
+    .theme-control { color:#20113c; font-family:inherit; font-weight:900; } .theme-select { border:3px solid #20113c; border-radius:7px; background:#fffdf4; color:#20113c; box-shadow:3px 3px 0 #20113c; font-family:inherit; font-weight:900; }
+    .sidebar { background:#00d0ce; border-right:4px solid #20113c; } .sidebar-head { background:#00d0ce; border-bottom:4px solid #20113c; } .sidebar-title { color:#20113c; font-size:16px; font-weight:900; text-transform:uppercase; } .count { border:2px solid #20113c; border-radius:99px; background:#ffdd28; color:#20113c; font-weight:900; } .search { border:3px solid #20113c; border-radius:7px; background:#fffdf4; color:#20113c; box-shadow:2px 2px 0 #20113c; font-family:inherit; }
+    .topic { margin:0 7px 7px; border:3px solid #20113c; border-left:3px solid #20113c; border-radius:8px 2px 8px 2px; background:#fffdf4; color:#20113c; box-shadow:2px 2px 0 #20113c; font-weight:850; } .topic:nth-child(3n) { background:#ffe26a; } .topic:hover { background:#ffadcc; color:#20113c; } .topic.active { border-left-color:#20113c; background:#9633df; color:#fff; } .topic-badge { border-radius:99px; background:#20113c; color:#fff; } .topic.active .topic-badge { background:#ffdd28; color:#20113c; }
+    .main-head { min-height:66px; border-bottom:4px solid #20113c; background:#fffdf4; } .main-head h1 { color:#20113c; font-size:23px; font-weight:900; letter-spacing:.02em; text-transform:uppercase; } .crumb { color:#594a73; } .crumb span { color:#ed1767; } .content { background:transparent; }
+    .intro { border:4px solid #20113c; border-radius:13px 2px 13px 2px; background:#ffdd28; box-shadow:8px 8px 0 #9633df; transform:rotate(-.25deg); } .intro h2,.section-title,.card h2 { color:#20113c; font-weight:900; text-transform:uppercase; } .pill,.pill.green,.pill.purple { border:2px solid #20113c; border-radius:99px; background:#fffdf4; color:#20113c; font-family:inherit; font-weight:800; } .pill.green { background:#9af2ca; } .pill.purple { background:#e5c4ff; }
+    .card,.question { border:3px solid #20113c; border-radius:11px 2px 11px 2px; background:#fffdf4; box-shadow:5px 5px 0 #20113c; } .card:nth-child(3n) { border-color:#9633df; box-shadow:5px 5px 0 #9633df; } .card h2 { border-bottom:3px dotted #20113c; padding-bottom:7px; } .card h3,.answer h4 { color:#ed1767; } .table-wrap,.diagram { border:3px solid #20113c; border-radius:7px; } .diagram { background:#20113c; box-shadow:none; } th { background:#9633df; } th,td { border-color:#20113c; } tbody tr:nth-child(even) { background:#fff0a7; } .callout { border-left:8px solid #ed1767; border-radius:0 7px 7px 0; background:#ffe4ee; color:#20113c; }
+    .section-title button { border:3px solid #20113c; border-radius:6px; background:#00d0ce; color:#20113c; box-shadow:2px 2px 0 #20113c; font-family:inherit; font-weight:900; } .q-btn:hover { background:#fff0a7; } .question.open { border-color:#00a8e8; } .level { border:2px solid #20113c; border-radius:99px; } .answer { background:#fffdf4; } .say { border-left-color:#00a878; border-radius:0 7px 7px 0; background:#d5faea; color:#20113c; }
+    .flash-inner,.flash-face { border-radius:11px 2px 11px 2px; } .flash-inner { border:3px solid #20113c; box-shadow:5px 5px 0 #ed1767; } .flash:nth-child(3n) .flash-inner { box-shadow:5px 5px 0 #00a8e8; } .flash-front { background:#fffdf4; } .flash-back { background:#9633df; } .flash-label,.flash-term { font-family:inherit; } .flash-term { color:#ed1767; font-weight:900; } .flash-back .flash-label,.flash-back .flash-answer,.flash-back .flash-hint { color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="tabbar">
+      <button class="mobile-menu" id="menuButton" aria-label="Toggle topics">☰</button>
+      <div class="brand"><span class="brand-mark">◉</span> Interview Prep — Operating Systems</div>
+      <button class="tab-btn active" data-tab="learn">⚙️ Core Concepts</button>
+      <button class="tab-btn" data-tab="interview">💬 Interview Q&amp;A</button>
+      <button class="tab-btn" data-tab="revision">🧠 Revision Deck</button>
+      <label class="theme-control" for="themeSelect"><span>Theme</span><select class="theme-select" id="themeSelect"><option value="classic" selected>Classic</option><option value="brutalist">Brutalism</option><option value="maximalism">Maximalism</option><option value="retro">Retro</option><option value="glass">Glass</option></select></label>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+
+    <section class="page active" id="page-learn">
+      <aside class="sidebar" id="learnSidebar">
+        <div class="sidebar-head">
+          <div class="sidebar-title"><span>⚙️ OS Topics</span><span class="count" id="topicCount">10</span></div>
+          <input class="search" id="topicSearch" type="search" placeholder="Search concepts..." autocomplete="off" />
+        </div>
+        <nav class="topics" id="topics"></nav>
+      </aside>
+      <main class="main">
+        <div class="main-head"><h1 id="learnTitle">Operating Systems</h1><div class="crumb" id="learnCrumb">Start here <span>→ Foundations</span></div></div>
+        <div class="content" id="learnContent"></div>
+      </main>
+    </section>
+
+    <section class="page" id="page-interview">
+      <aside class="sidebar" id="interviewSidebar">
+        <div class="sidebar-head">
+          <div class="sidebar-title"><span>💬 Question Bank</span><span class="count" id="questionCount">0</span></div>
+          <input class="search" id="questionSearch" type="search" placeholder="Search questions..." autocomplete="off" />
+        </div>
+        <nav class="topics" id="questionTopics"></nav>
+      </aside>
+      <main class="main">
+        <div class="main-head"><h1 id="interviewTitle">OS Interview Q&amp;A</h1><div class="crumb" id="interviewCrumb">Topic <span>→ All questions</span></div></div>
+        <div class="content" id="interviewContent"></div>
+      </main>
+    </section>
+
+    <section class="page" id="page-revision">
+      <aside class="sidebar" id="revisionSidebar">
+        <div class="sidebar-head">
+          <div class="sidebar-title"><span>🧠 Revision Deck</span><span class="count" id="flashCount">20</span></div>
+          <input class="search" id="flashSearch" type="search" placeholder="Search flashcards..." autocomplete="off" />
+        </div>
+        <nav class="topics" id="revisionTopics"></nav>
+      </aside>
+      <main class="main">
+        <div class="main-head"><h1>Fast Revision</h1><div class="crumb">Click a card <span>→ reveal answer</span></div></div>
+        <div class="content" id="revisionContent"></div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const TOPICS = [
+      {
+        id: 'foundations', icon: '◈', name: 'Foundations',
+        summary: 'What an operating system does, its core responsibilities, and the user/kernel boundary.',
+        blocks: [
+          { title: 'Operating system in one sentence', text: 'An operating system is the privileged software layer that abstracts hardware and safely manages CPU time, memory, storage, devices, and processes for programs.' },
+          { title: 'The big responsibilities', bullets: ['<b>Abstraction:</b> exposes processes, files, virtual memory, sockets, and system calls instead of raw hardware.', '<b>Resource management:</b> decides who gets CPU, RAM, disk, and I/O resources.', '<b>Protection and isolation:</b> prevents one application from corrupting another application or the kernel.', '<b>Concurrency:</b> coordinates many tasks that appear to run at once.'] },
+          { title: 'User mode vs kernel mode', diagram: 'User program\n   │ system call / trap\n   ▼\nKernel mode ── scheduler, VM, file system, drivers\n   │ privileged instruction / device access\n   ▼\nHardware', text: 'Applications run in <b>user mode</b> with restricted privileges. A system call transitions to <b>kernel mode</b>, where the OS validates the request and performs privileged work. This boundary is a security and stability mechanism.' },
+          { title: 'Boot sequence, interrupts, and traps', text: 'At boot, firmware initializes hardware and loads a bootloader, which loads the kernel. The kernel initializes memory management, drivers, and the first user-space process. After boot, control enters the kernel through three main paths: a <b>system call</b> requested by a program, an <b>exception</b> caused by the current instruction (such as a page fault), or a hardware <b>interrupt</b> from an external device.' },
+          { title: 'Types of operating systems', table: [['Type','Primary goal','Example use'], ['Batch','Run queued, similar jobs efficiently','Offline payroll or large offline jobs'], ['Time-sharing / multitasking','Responsive interactive use for many tasks','Desktop and server OSes'], ['Real-time','Meet bounded timing deadlines','Industrial control, avionics, embedded systems'], ['Distributed / network','Coordinate resources across machines','Clusters and network-managed environments'], ['Mobile / embedded','Work within constrained hardware and power budgets','Phones, appliances, IoT devices']] },
+          { title: 'Shell and command interpreter', text: 'A <b>shell</b> is a user-space command interpreter, not the kernel. It parses commands, starts programs, sets environment variables, wires up pipes and redirections, and waits for foreground jobs. The shell relies on system calls such as <code>fork()</code>, <code>exec()</code>, <code>open()</code>, <code>dup2()</code>, and <code>waitpid()</code> to do that work.' },
+          { title: 'Kernel designs', table: [['Design','Idea','Trade-off'], ['Monolithic','Most services run in kernel space','Fast calls; larger trusted code base'], ['Microkernel','Minimal kernel; services in user space','Better isolation; IPC overhead'], ['Hybrid','Mix of both approaches','Practical compromise used by many modern OSes']] }
+        ]
+      },
+      {
+        id: 'processes', icon: '◉', name: 'Processes & Threads',
+        summary: 'Execution units, lifecycle, context switches, and how threads share a process.',
+        blocks: [
+          { title: 'Process vs thread', table: [['Process','Thread'], ['Independent address space and OS resources','Execution path inside a process'], ['Higher creation and switch cost','Cheaper creation and switch cost'], ['Communicates via IPC','Shares heap, code, and open files'], ['Strong isolation','Needs synchronization around shared data']] },
+          { title: 'Multithreading — why use it?', text: 'A multithreaded process has multiple execution paths sharing one address space. It improves <b>responsiveness</b> (a UI or server can keep serving while another task waits), <b>resource sharing</b> (no heavy IPC for in-process data), and <b>throughput</b> by overlapping I/O or using multiple CPU cores.' },
+          { title: 'Concurrency vs parallelism', diagram: 'Concurrency:  one core interleaves tasks over time\n              A → B → A → B\n\nParallelism:  multiple cores execute tasks at the same time\n              core 1: A → A → A\n              core 2: B → B → B', text: 'Threads enable <b>concurrency</b> even on one core. They deliver true <b>parallelism</b> only when multiple runnable threads execute on different cores. I/O-bound programs often benefit from concurrency; CPU-bound work needs enough independent work and cores to scale.' },
+          { title: 'Threading models', table: [['Model','Mapping','Benefit','Limitation'], ['Many-to-one','Many user threads → one kernel thread','Very low user-space management cost','One blocking system call blocks all; no multicore parallelism'], ['One-to-one','One user thread → one kernel thread','True multicore parallelism; a blocked thread does not stop others','Kernel thread creation and scheduling cost'], ['Many-to-many','Many user threads multiplexed over kernel threads','Can balance flexibility and kernel resources','Complex; uncommon in mainstream application APIs']] },
+          { title: 'Thread safety and common hazards', bullets: ['<b>Race condition:</b> two threads interleave access to shared mutable state incorrectly.', '<b>Deadlock:</b> threads wait in a circular dependency, often on locks.', '<b>Starvation:</b> a thread cannot acquire CPU or a lock because others keep winning.', '<b>False sharing:</b> independent variables on the same cache line cause costly cache-coherence traffic.', '<b>Thread-safe design:</b> protect invariants with locks or atomics, minimize shared mutable state, and use immutable messages or thread-safe queues where possible.'] },
+          { title: 'Thread pools', text: 'Creating an unbounded thread per request can exhaust memory and spend excessive time scheduling. A <b>thread pool</b> keeps a bounded number of reusable worker threads that pull jobs from a queue. It controls concurrency, amortizes creation cost, and provides natural backpressure when the queue fills.' },
+          { title: 'PCB and process table', text: 'The kernel represents each process with a <b>process control block (PCB)</b>. It records identity (PID), state, program counter and registers, scheduling/accounting information, memory-map references, open-file information, credentials, and parent/child links. The <b>process table</b> is the kernel collection of these records, enabling scheduling, signals, and resource cleanup.' },
+          { title: 'Process state model', diagram: 'new ──► ready ──► running ──► terminated\n            ▲       │  │\n            │       │  └──► waiting / blocked\n            └───────┴──── I/O completion', text: 'A runnable task waits in the <b>ready</b> queue. The scheduler dispatches it to <b>running</b>. It becomes <b>blocked</b> when waiting for I/O, a lock, or an event.' },
+          { title: 'Context switch', text: 'The kernel saves the current execution context—program counter, registers, stack pointer, scheduling state—and restores another task’s context. Switching processes can also change page tables and invalidate TLB entries, making it more expensive than switching threads in one process.' },
+          { title: 'fork(), wait(), and exec() lifecycle', diagram: 'parent process\n   │ fork()\n   ├──────────────► parent: receives child PID\n   │\n   └──────────────► child: receives 0\n                         │\n                         ├─ work, then exit(status) ──► parent calls wait()/waitpid()\n                         │\n                         └─ exec(program) ──► same PID, new program image', text: '<code>fork()</code> creates a child process by duplicating the parent’s process context. The child gets a distinct PID, its own registers and stack, and logically separate memory. The parent receives the child PID; the child receives <code>0</code>; failure returns <code>-1</code> to the parent. The parent uses <code>wait()</code> or <code>waitpid()</code> to collect the child’s exit status. <code>exec()</code> does <em>not</em> create a process—it replaces the current process image with a new program while retaining the PID.' },
+          { title: 'Why fork is not an eager full copy', text: 'Modern systems implement <b>copy-on-write</b>. Parent and child initially point at the same physical pages, marked read-only. When either writes to a page, a page fault lets the kernel copy just that page. This makes the common shell pattern—<code>fork()</code> followed immediately by <code>exec()</code>—efficient.' },
+          { title: 'fork() pitfalls to remember', bullets: ['<b>Buffered output:</b> unflushed user-space buffers can be copied, so output printed before <code>fork()</code> may appear twice.', '<b>File descriptors:</b> both processes inherit descriptors that refer to the same underlying open-file description, so they can share a file offset.', '<b>Zombie:</b> an exited child remains as a small process-table entry until its parent reaps it with <code>wait()</code>.', '<b>Orphan:</b> if the parent exits first, the child is adopted by an init-like process.', '<b>Multithreaded process:</b> after <code>fork()</code>, only the calling thread exists in the child; calling non-async-signal-safe functions before <code>exec()</code> can be dangerous.'] },
+          { title: 'Common interview nuance', callout: '<b>Threads do not make code automatically faster.</b> They help when work can run in parallel or overlap waits. Contention, cache effects, and synchronization can erase the benefit.' }
+        ]
+      },
+      {
+        id: 'ipc', icon: '⇆', name: 'Inter-Process Communication',
+        summary: 'How isolated processes exchange data and coordinate through pipes, signals, message queues, shared memory, and sockets.',
+        blocks: [
+          { title: 'Why IPC exists', text: 'Processes are intentionally isolated: one process cannot directly read another process’s virtual memory. <b>Inter-process communication (IPC)</b> provides controlled ways to exchange data, synchronize work, and build client-server systems.' },
+          { title: 'IPC mechanisms compared', table: [['Mechanism','Best for','Key property'], ['Pipe','Related processes; command pipelines','Byte stream, normally one-way; kernel-buffered'], ['Named pipe (FIFO)','Unrelated local processes','Named object in the file system'], ['Message queue','Discrete messages and decoupled producers/consumers','Kernel or broker preserves message boundaries'], ['Shared memory','High-throughput local sharing','Fastest data path; requires separate synchronization'], ['Socket','Local or network client-server communication','Bidirectional, works across machines'], ['Signal','Small asynchronous notification','Carries minimal data; not a general data channel']] },
+          { title: 'Pipe versus shared memory', diagram: 'pipe:          Process A → kernel buffer → Process B\nshared memory: Process A ↔ shared pages ↔ Process B\n                         ▲\n                    mutex / semaphore needed', text: 'Pipes are simpler and naturally synchronize the byte stream through the kernel. Shared memory avoids copying large data through the kernel after setup, but processes must explicitly coordinate access with semaphores, mutexes, or atomics.' },
+          { title: 'Signals', text: 'A signal is an asynchronous notification delivered to a process or thread—for example <code>SIGTERM</code>, <code>SIGINT</code>, or <code>SIGCHLD</code>. A process can handle, block, or ignore many signals, but <code>SIGKILL</code> and <code>SIGSTOP</code> cannot be caught or ignored.' },
+          { title: 'Choosing an IPC mechanism', callout: 'Use a <b>pipe</b> for a simple local stream, a <b>message queue</b> when message boundaries and decoupling matter, <b>shared memory</b> for high-throughput local data with explicit synchronization, and <b>sockets</b> for client-server communication or communication across machines.' }
+        ]
+      },
+      {
+        id: 'scheduling', icon: '◌', name: 'CPU Scheduling',
+        summary: 'How the scheduler balances response time, throughput, fairness, and deadlines.',
+        blocks: [
+          { title: 'Scheduling goals', bullets: ['<b>CPU utilization:</b> keep useful work running.', '<b>Throughput:</b> complete more jobs per unit time.', '<b>Turnaround:</b> reduce submit-to-finish time.', '<b>Waiting time:</b> reduce time in the ready queue.', '<b>Response time:</b> start interactive work quickly.', '<b>Fairness:</b> prevent indefinite starvation.'] },
+          { title: 'Algorithms at a glance', table: [['Algorithm','Strength','Risk'], ['FCFS','Simple, fair by arrival','Convoy effect; weak response time'], ['SJF / SRTF','Optimal average waiting time if durations known','Long jobs can starve'], ['Round robin','Responsive, fair time slices','Very small quantum = switch overhead'], ['Priority','Expresses importance','Starvation; use aging'], ['MLFQ','Adapts to interactive vs CPU-bound jobs','Complex tuning']] },
+          { title: 'Time quantum trade-off', text: 'A short quantum improves responsiveness but increases context-switch overhead. A long quantum reduces overhead but makes round robin look like FCFS. A good answer calls out workload and scheduling objective rather than claiming one fixed ideal value.' }
+          ,{ title: 'Schedulers and dispatcher', table: [['Component','Responsibility'], ['Long-term scheduler','Admits jobs into the system; controls degree of multiprogramming'], ['Short-term scheduler','Chooses the next ready task to run; runs very frequently'], ['Medium-term scheduler','Suspends/swaps processes to manage memory pressure'], ['Dispatcher','Performs the switch: saves/restores context, changes mode, and jumps to the selected task']] }
+          ,{ title: 'Preemptive vs non-preemptive scheduling', text: '<b>Preemptive</b> scheduling can interrupt a running process, which improves responsiveness and lets a newly important task run quickly; it needs careful synchronization because execution can be interrupted. <b>Non-preemptive</b> scheduling lets a process run until it blocks, yields, or finishes; it is simpler but can make interactive tasks wait longer.' }
+        ]
+      },
+      {
+        id: 'sync', icon: '⇄', name: 'Synchronization',
+        summary: 'Race conditions, locks, semaphores, condition variables, and safe shared-state design.',
+        blocks: [
+          { title: 'Race condition', text: 'A race condition occurs when the result depends on timing or interleaving of concurrent operations. For example, two threads reading and then incrementing the same counter can lose an update.' },
+          { title: 'Critical section requirements', bullets: ['<b>Mutual exclusion:</b> at most one task enters the sensitive region.', '<b>Progress:</b> if no one is inside, choosing the next entrant should not be postponed forever.', '<b>Bounded waiting:</b> a task should not wait indefinitely while others repeatedly enter.'] },
+          { title: 'Synchronization primitives', table: [['Primitive','Use it for','Key point'], ['Mutex','One owner protects a critical section','Owner must release it'], ['Semaphore','Counting permits or signaling','Can be binary or counting'], ['Condition variable','Wait for a condition while holding a mutex','Always wait in a loop'], ['Spinlock','Very short waits in low-level code','Wastes CPU while spinning'], ['Read-write lock','Many readers, rare writers','Writer starvation may need handling']] },
+          { title: 'Producer–consumer pattern', diagram: 'Producer ── put(item) ──► bounded buffer ── take() ──► Consumer\n              wait(notFull)                   wait(notEmpty)\n              signal(notEmpty)                signal(notFull)', text: 'Use a mutex for the buffer itself and condition variables or semaphores to wait for <code>notFull</code> and <code>notEmpty</code>. The condition must be rechecked after waking because wakeups can be spurious or the state can change again.' }
+          ,{ title: 'Atomics, monitors, and hardware support', text: '<b>Atomic read-modify-write</b> instructions such as compare-and-swap (CAS) and test-and-set are the building blocks for locks and lock-free algorithms. A <b>monitor</b> packages shared state, the mutual-exclusion lock, and condition variables behind a disciplined interface. It is a higher-level construct than raw semaphores and reduces synchronization mistakes.' }
+          ,{ title: 'Classic synchronization problems', table: [['Problem','What it teaches'], ['Producer–consumer','Bounded buffer coordination and condition predicates'], ['Readers–writers','Trade-off between shared reads, exclusive writes, and fairness'], ['Dining philosophers','How naive resource acquisition creates deadlock or starvation']] }
+          ,{ title: 'Priority inversion', callout: 'A high-priority thread waits for a lock held by a low-priority thread while medium-priority work keeps preempting the low-priority owner. <b>Priority inheritance</b> temporarily boosts the lock owner so it can run, release the lock, and unblock the high-priority task.' }
+        ]
+      },
+      {
+        id: 'deadlocks', icon: '⛓', name: 'Deadlocks',
+        summary: 'How circular waiting arises, and how systems prevent, avoid, detect, or recover from it.',
+        blocks: [
+          { title: 'All four Coffman conditions must hold', table: [['Condition','Meaning','Break it by'], ['Mutual exclusion','Resource cannot be shared','Make resource sharable where possible'], ['Hold and wait','Task holds one resource while requesting another','Request all at once / release before requesting'], ['No preemption','Resource cannot be forcibly taken','Allow rollback or preemption'], ['Circular wait','Cycle of resource dependencies','Impose a global resource order']] },
+          { title: 'Four strategies', bullets: ['<b>Prevention:</b> structurally break a Coffman condition.', '<b>Avoidance:</b> grant only if the state remains safe; Banker’s algorithm needs maximum claims.', '<b>Detection + recovery:</b> allow deadlocks, find cycles, then abort or roll back victims.', '<b>Ignore:</b> reasonable where deadlocks are rare and prevention cost is high.'] },
+          { title: 'Deadlock vs starvation vs livelock', text: '<b>Deadlock:</b> no participant can proceed. <b>Starvation:</b> a participant waits indefinitely while others progress. <b>Livelock:</b> participants keep changing state but still make no useful progress.' }
+          ,{ title: 'Resource-allocation graph and Banker’s algorithm', text: 'A <b>resource-allocation graph</b> models processes, resource instances, requests, and assignments. With one instance per resource type, a cycle implies deadlock; with multiple instances, a cycle is necessary but not sufficient. <b>Banker’s algorithm</b> avoids deadlock by granting a request only if a safe completion sequence remains, using each process’s declared maximum demand. It is conceptually important but rarely practical when maximum claims are unknown.' }
+          ,{ title: 'Detection and recovery', text: 'A system can allow deadlocks and periodically detect cycles or run a matrix-based detection algorithm. Recovery then aborts one or more processes, preempts a recoverable resource, or rolls work back to a checkpoint. Victim selection considers priority, progress, resources held, and restart cost.' }
+        ]
+      },
+      {
+        id: 'memory', icon: '▣', name: 'Memory Management',
+        summary: 'Address spaces, allocation, fragmentation, paging, segmentation, and address translation.',
+        blocks: [
+          { title: 'Why virtual memory exists', bullets: ['Each process gets a large, private, contiguous-looking address space.', 'Programs are isolated from one another.', 'Only the active portion needs to reside in RAM.', 'Pages can be shared efficiently, for example read-only program code.'] },
+          { title: 'Paging vs segmentation', table: [['Paging','Segmentation'], ['Fixed-size blocks: pages and frames','Variable-size logical regions'], ['Avoids external fragmentation','Can suffer external fragmentation'], ['May have internal fragmentation','Maps naturally to code/data/stack units'], ['Dominant model in modern general-purpose OSes','Often combined conceptually with paging']] },
+          { title: 'Address translation', diagram: 'virtual address = [ virtual page number | offset ]\n                         │\n                         ▼\n                   page table / TLB\n                         │\n                         ▼\nphysical address = [ physical frame number | offset ]', text: 'The offset is copied unchanged. The translation maps the virtual page number to a physical frame number. A <b>TLB</b> caches recent translations so each memory reference does not require a full page-table walk.' },
+          { title: 'Fragmentation', text: '<b>Internal fragmentation</b> is unused space inside an allocated block; fixed-size pages can have it in the last page. <b>External fragmentation</b> is free memory split into small non-contiguous holes; paging largely removes it.' }
+          ,{ title: 'Logical vs physical address', text: 'A <b>logical</b> (virtual) address is generated by the CPU for a process. A <b>physical</b> address identifies real RAM. The memory-management unit (MMU) translates the former to the latter and enforces page permissions. This translation is what lets separate processes use the same virtual addresses safely.' }
+          ,{ title: 'Contiguous allocation and kernel allocators', table: [['Technique','Idea','Trade-off'], ['First / best / worst fit','Choose the first, smallest suitable, or largest free hole','Simple; suffers external fragmentation'], ['Compaction','Move allocated regions together to form a larger hole','Expensive; requires relocatable addresses'], ['Buddy allocator','Split power-of-two blocks; merge free buddies','Fast split/merge; internal fragmentation'], ['Slab allocator','Reuse caches of initialized kernel objects','Fast object allocation; specialized usage']] }
+        ]
+      },
+      {
+        id: 'virtual-memory', icon: '⇣', name: 'Virtual Memory',
+        summary: 'Demand paging, page faults, replacement policies, copy-on-write, and thrashing.',
+        blocks: [
+          { title: 'What happens on a page fault?', diagram: 'CPU references absent page\n   ▼\ntrap to kernel → validate access → find free frame or choose victim\n   ▼\nread page from storage → update page table / TLB → restart instruction', text: 'A page fault is normal under demand paging. It becomes an error only when the address or permission is invalid. Disk I/O makes a major fault much slower than an ordinary memory access.' },
+          { title: 'Page-table entries and table structure', text: 'A <b>page-table entry (PTE)</b> stores the physical frame number plus control bits such as <b>present/valid</b>, read/write/execute <b>protection</b>, <b>accessed/reference</b>, and <b>dirty</b>. Large address spaces make one flat page table expensive, so systems commonly use multi-level page tables; some workloads use inverted or hashed tables. The TLB keeps the frequent translations fast.' },
+          { title: 'Replacement policies', table: [['Policy','Idea','Note'], ['OPT','Evict page used farthest in the future','Theoretical benchmark only'], ['FIFO','Evict oldest loaded page','Can show Belady’s anomaly'], ['LRU','Evict least recently used page','Good locality intuition; exact LRU is costly'], ['Clock / second chance','Approximate LRU with reference bits','Common practical approach']] },
+          { title: 'Copy-on-write', text: 'After <code>fork()</code>, parent and child initially point to the same physical pages marked read-only. A write triggers a fault; the kernel copies only that page. This avoids copying an entire address space when the child soon executes another program.' },
+          { title: 'Thrashing', callout: 'When the working sets of active processes do not fit in RAM, page faults dominate and the system spends more time paging than executing. Reduce multiprogramming, add memory, or use working-set / page-fault-frequency control.' }
+          ,{ title: 'Swapping and swap space', text: '<b>Swap space</b> is disk-backed storage used to hold memory pages that are not currently in RAM. Swapping an entire process is the older conceptual model; modern demand-paged systems generally move individual pages. Swap extends capacity but is vastly slower than RAM, so sustained swap activity is a performance warning.' }
+        ]
+      },
+      {
+        id: 'files', icon: '▤', name: 'File Systems',
+        summary: 'Files, directories, inodes, allocation, caching, journaling, and durability.',
+        blocks: [
+          { title: 'The file system’s job', text: 'It maps human-friendly paths and byte streams onto persistent blocks while enforcing naming, metadata, permissions, consistency, and recovery rules.' },
+          { title: 'Inode intuition', diagram: 'directory entry: "report.pdf" ──► inode number\n                                      │\n                                      ▼\ninode: owner, permissions, size, timestamps, block pointers\n                                      │\n                                      ▼\n                              data blocks on disk', text: 'In Unix-like systems, a directory maps names to inode numbers. The inode stores metadata and where data blocks live; the filename is not stored in the inode itself.' },
+          { title: 'Allocation strategies', table: [['Contiguous','Fast sequential and random access','External fragmentation; growth difficult'], ['Linked','Simple growth, no external fragmentation','Slow random access; pointer overhead'], ['Indexed','Index block points to data blocks','Extra metadata; flexible access']] },
+          { title: 'Journaling', text: 'A journaling file system records intended metadata changes in a log before applying them to the main structure. After a crash, it can replay or roll back an incomplete transaction, shortening recovery and protecting consistency.' }
+          ,{ title: 'Directories and access methods', table: [['Concept','Key idea'], ['Directory structures','Single-level is simple; tree directories support hierarchy; DAG-like structures allow sharing but need cycle control'], ['Sequential access','Read or write in order; efficient for streams'], ['Direct / random access','Jump to a byte offset or record; important for databases and media'], ['Indexed access','An index maps keys or record numbers to data locations']] }
+          ,{ title: 'Free-space management', text: 'A file system tracks unused blocks using a <b>bitmap</b>, <b>free list</b>, grouping, or counting. Bitmaps are compact and make it easier to find contiguous space; linked free lists are simple but can be slower to search.' }
+        ]
+      },
+      {
+        id: 'io', icon: '↯', name: 'I/O & Storage',
+        summary: 'Interrupts, DMA, buffering, caching, disks, SSDs, and asynchronous I/O.',
+        blocks: [
+          { title: 'Polling vs interrupts vs DMA', table: [['Polling','CPU repeatedly checks device status','Simple; wastes CPU for slow events'], ['Interrupts','Device signals CPU when service is needed','Efficient; interrupt handling has overhead'], ['DMA','Device transfers a block directly to memory','CPU sets up transfer; great for bulk I/O']] },
+          { title: 'Buffering, caching, spooling', bullets: ['<b>Buffering:</b> smooths a speed mismatch while data is being transferred.', '<b>Caching:</b> keeps likely-to-be-reused data to avoid expensive access.', '<b>Spooling:</b> queues work for a device that serves one request at a time, such as a printer.'] },
+          { title: 'Disk scheduling — when it matters', text: 'For rotating HDDs, moving the read/write head is costly, so the OS may reorder requests to reduce seek time while keeping wait times reasonable. These algorithms are far less important for SSDs because they have no moving head, although queueing and write-aware scheduling still matter.' },
+          { title: 'HDD disk-scheduling algorithms', table: [['Algorithm','How it chooses requests','Strength','Main limitation'], ['FCFS','Serve in arrival order','Simple and fair by arrival','Can cause large, inefficient head movement'], ['SSTF','Serve the nearest pending cylinder','Usually lowers average seek time','Distant requests may starve'], ['SCAN (elevator)','Sweep in one direction, serving requests; reverse at disk end','Predictable waits; avoids SSTF starvation','May travel to an unused physical end'], ['C-SCAN','Serve in one direction only; jump back to the beginning','More uniform waiting time across cylinders','Return trip does no useful work'], ['LOOK','Like SCAN, but reverse at the last pending request','Avoids unnecessary travel to disk end','Still gives slight directional preference'], ['C-LOOK','Like C-SCAN, but jump from last pending request to lowest pending request','Uniform circular service without physical-end travel','Jump still adds delay for requests behind the head']] },
+          { title: 'SCAN family visual', diagram: 'requests:  14   37      65        98\nhead:                     53 →\n\nSCAN / LOOK:  53 → 65 → 98  then reverse  → 37 → 14\nC-SCAN / C-LOOK: 53 → 65 → 98  then wrap  → 14 → 37\n\nSCAN and C-SCAN use the physical disk boundary.\nLOOK and C-LOOK stop at the last outstanding request.' },
+          { title: 'Interview decision guide', callout: '<b>FCFS</b> for simplicity and strict arrival order. <b>SSTF</b> for local seek efficiency when starvation is acceptable or controlled. <b>SCAN / LOOK</b> for a balanced elevator-style policy. <b>C-SCAN / C-LOOK</b> when you want more uniform waiting time regardless of cylinder position.' }
+        ]
+      },
+      {
+        id: 'protection', icon: '⌘', name: 'Protection & Linux',
+        summary: 'Permissions, isolation, system calls, signals, and practical Linux interview basics.',
+        blocks: [
+          { title: 'Protection mechanisms', bullets: ['<b>CPU modes:</b> applications cannot run privileged instructions.', '<b>Virtual memory:</b> page permissions enforce read/write/execute boundaries.', '<b>User and group IDs:</b> authorize access to files and services.', '<b>Capabilities / ACLs:</b> grant narrower rights than an all-powerful user.'] },
+          { title: 'Signals and process control', table: [['Command / concept','What it helps with'], ['<code>ps</code>, <code>top</code>, <code>htop</code>','Inspect processes and CPU / memory use'], ['<code>kill -TERM pid</code>','Request graceful termination'], ['<code>kill -KILL pid</code>','Force termination; cannot be handled or cleaned up'], ['<code>nice</code> / <code>renice</code>','Influence scheduler niceness'], ['<code>lsof</code>','See open files and sockets']] },
+          { title: 'Good production-debugging sequence', callout: 'Start with the symptom: CPU, memory, I/O, or blocked requests. Then inspect process state, resource usage, logs, open files/sockets, and only then reach for a fix. Avoid treating <code>SIGKILL</code> as a default solution.' }
+        ]
+      },
+      {
+        id: 'virtualization', icon: '▧', name: 'Virtualization & Containers',
+        summary: 'How hypervisors and operating-system isolation run workloads safely and efficiently on shared hardware.',
+        blocks: [
+          { title: 'Virtual machines', text: 'A virtual machine presents virtual CPU, memory, storage, and devices to a guest OS. A <b>Type 1 (bare-metal) hypervisor</b> runs directly on hardware; a <b>Type 2 hypervisor</b> runs as an application on a host OS. Hardware virtualization support lets privileged guest operations be safely intercepted or virtualized.' },
+          { title: 'Containers', text: 'Containers do not run a separate guest kernel. They isolate processes sharing the host kernel using mechanisms such as <b>namespaces</b> (separate views of PIDs, mounts, networks, and users) and <b>cgroups</b> (resource limits and accounting). They start faster and use fewer resources than VMs, but share a kernel security boundary.' },
+          { title: 'VMs versus containers', table: [['VM','Container'], ['Includes a guest OS and its own kernel','Shares host kernel'], ['Stronger isolation boundary','Lightweight process-level isolation'], ['Slower start; larger image','Fast start; smaller image'], ['Can run a different OS kernel','Must be compatible with host kernel']] }
+        ]
+      }
+    ];
+
+    const QUESTIONS = [
+      { topic: 'Processes & Threads', level: 'core', q: 'What is the difference between a process and a thread?', a: '<p>A <b>process</b> owns an isolated virtual address space and OS resources. A <b>thread</b> is a schedulable execution path within that process. Threads share code, heap, and open files, but have their own registers and stack.</p><h4>Why it matters</h4><p>Processes give stronger fault isolation; threads have lower communication and context-switch cost but introduce shared-state races.</p>', say: 'A process is a resource container; a thread is the unit of execution inside it.' },
+      { topic: 'Processes & Threads', level: 'core', q: 'What is the difference between concurrency and parallelism?', a: '<p><b>Concurrency</b> is making progress on multiple tasks during an overlapping time period; one CPU core can achieve it by interleaving threads. <b>Parallelism</b> is executing tasks at the exact same time, which requires multiple execution resources such as CPU cores.</p><p>Multithreading enables concurrency. It improves CPU-bound throughput only when the work is parallelizable and actual cores are available.</p>', say: 'Concurrency is about managing many tasks; parallelism is about doing many tasks simultaneously.' },
+      { topic: 'Processes & Threads', level: 'common', q: 'Why use a thread pool instead of creating a thread per request?', a: '<p>A thread pool reuses a bounded set of worker threads. It avoids repeated creation cost, caps memory and scheduler pressure, and limits the number of concurrent operations against downstream resources. Jobs wait in a queue when all workers are busy.</p><h4>Important trade-off</h4><p>The pool and queue need sensible bounds. An unbounded queue can hide overload until latency and memory grow uncontrollably.</p>', say: 'A thread pool is a concurrency-control and backpressure mechanism, not only a performance optimization.' },
+      { topic: 'Processes & Threads', level: 'deep', q: 'What is false sharing?', a: '<p>False sharing occurs when different threads modify different variables that happen to occupy the same CPU cache line. Cache-coherence invalidations then bounce that line between cores even though the threads do not logically share a variable.</p><p>Mitigate it by separating hot per-thread data, padding/alignment when justified, or changing the data layout.</p>', say: 'False sharing is a hardware-level performance problem caused by sharing a cache line, not by sharing a variable.' },
+      { topic: 'Processes & Threads', level: 'common', q: 'What happens during a context switch?', a: '<p>The kernel saves the old task’s CPU state and restores another task’s state. This includes registers, program counter, stack pointer, and scheduling metadata.</p><h4>Cost to mention</h4><p>A process switch may also change page tables, disturb the TLB, and hurt cache locality. The switch itself does no useful application work.</p>', say: 'Context switching enables multitasking, but too much of it reduces throughput.' },
+      { topic: 'Processes & Threads', level: 'deep', q: 'Explain fork(), wait(), exec(), and copy-on-write.', a: '<p><code>fork()</code> creates a child process. It returns the child PID in the parent, <code>0</code> in the child, and <code>-1</code> on failure. The parent normally calls <code>wait()</code> or <code>waitpid()</code> to reap the child and obtain its exit status. Without that reap, an exited child becomes a zombie.</p><p><code>exec()</code> replaces the calling process image with a new program—it does not make another process and retains the PID. <b>Copy-on-write</b> makes <code>fork()</code> efficient: parent and child initially share read-only physical pages, and the OS copies a page only when either writes to it.</p>', say: 'Fork creates a child, wait reaps it, and exec replaces a process image. Copy-on-write avoids eagerly copying the address space.' },
+      { topic: 'Inter-Process Communication', level: 'core', q: 'How are pipes, shared memory, and sockets different?', a: '<p><b>Pipes</b> are kernel-buffered byte streams, ideal for simple local producer-consumer flows and shell pipelines. <b>Shared memory</b> maps the same physical pages into multiple processes and is fastest for large local data, but needs explicit synchronization. <b>Sockets</b> are bidirectional endpoints that work locally or across a network, making them the standard client-server primitive.</p>', say: 'Choose pipes for simplicity, shared memory for high-throughput local sharing, and sockets for client-server or cross-machine communication.' },
+      { topic: 'Processes & Threads', level: 'common', q: 'What are zombie and orphan processes?', a: '<p>A <b>zombie</b> has exited but remains in the process table because its parent has not collected its exit status with <code>wait()</code>. An <b>orphan</b> is still running after its parent exits; the OS reparents it to an init-like process, which can later reap it.</p>', say: 'Zombies consume a process-table slot; orphans keep running under a new parent.' },
+      { topic: 'CPU Scheduling', level: 'core', q: 'How does round-robin scheduling work? What is the quantum trade-off?', a: '<p>Ready processes are served in a circular queue, each receiving at most one time quantum. Unfinished processes return to the tail.</p><ul><li>Small quantum: responsive but context-switch heavy.</li><li>Large quantum: lower overhead but poorer interactivity, approaching FCFS.</li></ul>', say: 'Choose the quantum based on workload: interactive systems value response time, batch systems value throughput.' },
+      { topic: 'CPU Scheduling', level: 'common', q: 'What is starvation, and how does aging solve it?', a: '<p><b>Starvation</b> means a task waits indefinitely because higher-priority tasks keep being chosen. <b>Aging</b> gradually raises the effective priority of a waiting task so it eventually runs.</p>', say: 'Priority policies need a fairness mechanism—aging is the standard answer.' },
+      { topic: 'CPU Scheduling', level: 'common', q: 'What is the difference between a scheduler and a dispatcher?', a: '<p>The <b>scheduler</b> decides <em>which</em> ready process should run next. The <b>dispatcher</b> makes that decision real by performing the context switch, changing to user mode, and transferring execution to that process.</p><p>The short-term scheduler runs frequently; long-term and medium-term schedulers control admission and memory pressure less frequently.</p>', say: 'The scheduler chooses; the dispatcher switches.' },
+      { topic: 'CPU Scheduling', level: 'core', q: 'Preemptive vs non-preemptive scheduling?', a: '<p><b>Preemptive</b> scheduling can interrupt a running task, improving responsiveness and enforcing priorities. <b>Non-preemptive</b> scheduling lets the task continue until it blocks, yields, or terminates, which is simpler but can delay other work.</p>', say: 'Preemption improves responsiveness but makes synchronization and accounting more complex.' },
+      { topic: 'Synchronization', level: 'core', q: 'What is a race condition? Give an example.', a: '<p>A race condition arises when concurrent execution order changes the result. Two threads doing <code>counter = counter + 1</code> can both read the same old value and overwrite each other’s updates.</p><h4>Fix</h4><p>Protect the read-modify-write critical section with a mutex, atomic operation, or redesign to avoid shared mutable state.</p>', say: 'The bug is not merely simultaneous access; it is an unsafe interleaving of dependent operations.' },
+      { topic: 'Synchronization', level: 'deep', q: 'Why must a condition-variable wait be inside a loop?', a: '<p>A thread can wake spuriously, another thread can consume the condition first, or the predicate can become false before the woken thread reacquires the mutex. Therefore use <code>while (!condition) wait(cv, mutex)</code>, not an <code>if</code>.</p>', say: 'The condition is the truth; the notification is only a hint to recheck it.' },
+      { topic: 'Synchronization', level: 'common', q: 'Mutex vs semaphore?', a: '<p>A <b>mutex</b> models exclusive ownership: the locker is responsible for unlocking it. A <b>semaphore</b> holds a count of permits and is useful for bounded resources and signaling between tasks. A binary semaphore can resemble a mutex but does not inherently express ownership.</p>', say: 'Use a mutex for protecting shared state; use a semaphore for availability or signaling.' },
+      { topic: 'Synchronization', level: 'deep', q: 'What is a monitor?', a: '<p>A <b>monitor</b> is a higher-level synchronization construct that bundles shared data, procedures that access it, mutual exclusion, and condition variables. Only one thread executes monitor code at a time; condition waits temporarily release the monitor lock.</p>', say: 'A monitor is structured synchronization: shared state plus its lock and conditions behind one interface.' },
+      { topic: 'Synchronization', level: 'deep', q: 'What is priority inversion and how is it addressed?', a: '<p>A high-priority task waits on a lock held by a low-priority task, but medium-priority work repeatedly preempts that lock holder. The high-priority task is indirectly delayed by lower-priority work.</p><p><b>Priority inheritance</b> temporarily raises the priority of the lock holder so it can run and release the resource.</p>', say: 'Priority inheritance lets the low-priority lock owner run just long enough to unblock the high-priority task.' },
+      { topic: 'Deadlocks', level: 'core', q: 'What are the four necessary conditions for deadlock?', a: '<ul><li>Mutual exclusion</li><li>Hold and wait</li><li>No preemption</li><li>Circular wait</li></ul><p>All must hold at the same time. Breaking any one prevents deadlock.</p>', say: 'The most practical prevention technique is a global lock/resource acquisition order, which breaks circular wait.' },
+      { topic: 'Deadlocks', level: 'common', q: 'Differentiate deadlock, livelock, and starvation.', a: '<p><b>Deadlock:</b> participants wait forever; nothing moves. <b>Livelock:</b> participants keep responding to each other but make no useful progress. <b>Starvation:</b> a particular participant waits indefinitely while the system continues serving others.</p>', say: 'Deadlock has no progress; livelock has activity but no progress; starvation has progress for everyone except the unlucky task.' },
+      { topic: 'Deadlocks', level: 'deep', q: 'What is a safe state in Banker’s algorithm?', a: '<p>A state is <b>safe</b> when some sequence exists in which every process can obtain its remaining maximum resource needs, finish, and release resources for the next process. Banker’s algorithm grants a request only if the resulting state remains safe.</p><p>It requires known maximum claims, which limits its usefulness in general-purpose production systems.</p>', say: 'Safe does not mean no task is waiting now; it means there is a completion order that avoids deadlock.' },
+      { topic: 'Memory', level: 'core', q: 'What is the difference between paging and segmentation?', a: '<p>Paging divides memory into fixed-size pages and frames; it removes external fragmentation and is the basis of modern virtual memory. Segmentation divides memory into variable-size logical regions such as code, data, and stack; it matches program structure but can fragment externally.</p>', say: 'In practice, modern systems primarily use paging, though segments may remain in the architecture.' },
+      { topic: 'Memory', level: 'common', q: 'What is a TLB and why is it important?', a: '<p>The <b>translation lookaside buffer</b> is a small, fast cache of recent virtual-page to physical-frame translations. A TLB hit avoids a multi-level page-table walk, which is critical because address translation happens for nearly every memory access.</p>', say: 'The TLB is to address translation what a cache is to data: it makes the common case fast.' },
+      { topic: 'Virtual Memory', level: 'core', q: 'What occurs on a page fault?', a: '<p>The CPU traps to the kernel because a referenced virtual page is not resident or access is invalid. If valid but absent, the OS locates a frame (possibly evicting a victim), reads the page from storage, updates mappings, and restarts the instruction. Invalid access becomes a protection fault / process error.</p>', say: 'A page fault is often a normal demand-paging event; a segmentation fault is an invalid access.' },
+      { topic: 'Virtual Memory', level: 'common', q: 'What does a page-table entry contain?', a: '<p>A PTE identifies the mapped physical frame and usually carries <b>present/valid</b>, permission (read/write/execute), <b>accessed/reference</b>, and <b>dirty</b> bits. The MMU and OS use these bits to enforce isolation, handle faults, select replacement candidates, and decide whether a page needs writing back.</p>', say: 'A PTE is both a translation record and a protection/status record.' },
+      { topic: 'Virtual Memory', level: 'deep', q: 'What is thrashing?', a: '<p>Thrashing happens when processes lack enough frames for their active working sets. The page-fault rate spikes, and the machine spends most of its time moving pages between RAM and storage instead of executing instructions.</p><h4>Mitigation</h4><p>Lower multiprogramming, allocate frames using working-set or page-fault-frequency policies, or add RAM.</p>', say: 'High CPU idle time plus high page-fault / disk activity is the classic thrashing signature.' },
+      { topic: 'File Systems', level: 'core', q: 'What is an inode?', a: '<p>An inode is a file-system metadata structure that stores attributes such as ownership, permissions, size, timestamps, and pointers to data blocks. A directory maps a filename to an inode number; names are directory entries, not inode fields.</p>', say: 'Multiple hard links can point to the same inode, which is why the inode is the file identity.' },
+      { topic: 'File Systems', level: 'common', q: 'What is journaling in a file system?', a: '<p>Journaling writes an intended change to a log before committing it to the main file-system structures. After a crash, the system uses the journal to restore a consistent state quickly, especially for metadata changes.</p>', say: 'Journaling primarily protects consistency and recovery time; it is not automatically a substitute for durable application-level writes.' },
+      { topic: 'File Systems', level: 'common', q: 'How can a file system track free disk blocks?', a: '<p>Common approaches are a <b>bitmap</b>, a linked <b>free list</b>, grouping, and counting contiguous runs. A bitmap is compact and helps find contiguous blocks; a free list is simple but can be slower to scan.</p>', say: 'The data structure is a trade-off between metadata cost, search speed, and finding contiguous free space.' },
+      { topic: 'I/O & Storage', level: 'common', q: 'Interrupts vs polling vs DMA?', a: '<p><b>Polling</b> has the CPU repeatedly check a device. <b>Interrupts</b> let the device notify the CPU when attention is needed. <b>DMA</b> lets a device transfer bulk data directly to/from memory after CPU setup, usually completing with an interrupt.</p>', say: 'DMA minimizes CPU involvement in bulk transfers; interrupts avoid busy waiting for events.' },
+      { topic: 'I/O & Storage', level: 'core', q: 'Compare FCFS, SSTF, SCAN, C-SCAN, LOOK, and C-LOOK disk scheduling.', a: '<p><b>FCFS</b> follows arrival order: fair but not seek-efficient. <b>SSTF</b> picks the nearest request: good average seek time but can starve far requests. <b>SCAN</b> sweeps in both directions like an elevator; <b>C-SCAN</b> services only one direction and wraps back for more uniform waits.</p><p><b>LOOK</b> is SCAN without travelling to the physical disk end when no request is there. <b>C-LOOK</b> similarly improves C-SCAN by wrapping between the highest and lowest <em>pending</em> requests rather than the physical endpoints.</p>', say: 'LOOK and C-LOOK are optimized versions of SCAN and C-SCAN: stop at the last request, not at an empty disk boundary.' },
+      { topic: 'Protection & Linux', level: 'common', q: 'Why is SIGKILL different from SIGTERM?', a: '<p><code>SIGTERM</code> is a request a process can handle, ignore, or use for cleanup. <code>SIGKILL</code> cannot be caught or ignored; the kernel stops the process immediately, so cleanup handlers do not run.</p>', say: 'Try SIGTERM first. SIGKILL is a last resort because it can leave unfinished work or resources in a bad state.' }
+      ,{ topic: 'Virtualization & Containers', level: 'common', q: 'What is the difference between a VM and a container?', a: '<p>A <b>virtual machine</b> includes a guest OS and its own kernel, virtualized by a hypervisor. A <b>container</b> is an isolated process environment that shares the host kernel, typically using namespaces and cgroups.</p><p>VMs offer a stronger isolation boundary and can run a different kernel; containers are lighter and start faster but depend on host-kernel compatibility.</p>', say: 'A VM virtualizes a machine; a container isolates processes on one kernel.' }
+    ];
+
+    const FLASHCARDS = [
+      ['Scheduling', 'Turnaround time', 'Time from job submission to completion.'],
+      ['Scheduling', 'Response time', 'Time until the system first responds / begins servicing a request.'],
+      ['Processes', 'Zombie process', 'A terminated child whose exit status has not yet been reaped by its parent.'],
+      ['Processes', 'Orphan process', 'A running child whose parent exits; it is adopted by an init-like process.'],
+      ['Processes', 'fork() return values', 'Parent gets the child PID; child gets 0; the caller gets -1 if process creation fails.'],
+      ['Processes', 'exec()', 'Replaces the current process program image while retaining its PID; it does not create another process.'],
+      ['Threads', 'Concurrency vs parallelism', 'Concurrency overlaps tasks over time; parallelism executes tasks simultaneously on separate execution resources.'],
+      ['Threads', 'Thread pool', 'A bounded set of reusable workers consuming queued jobs; it controls concurrency and provides backpressure.'],
+      ['Threads', 'False sharing', 'Independent variables on one cache line create unnecessary cache-coherence traffic between cores.'],
+      ['Processes', 'PCB', 'The kernel record for a process: PID, state, saved CPU context, memory mappings, open files, credentials, and accounting.'],
+      ['Scheduling', 'Scheduler vs dispatcher', 'The scheduler selects the next task; the dispatcher performs the context switch and starts it.'],
+      ['Synchronization', 'Monitor', 'A disciplined shared-state abstraction that combines mutual exclusion with condition variables.'],
+      ['Synchronization', 'Priority inversion', 'A high-priority task is blocked by a low-priority lock holder; priority inheritance mitigates it.'],
+      ['Deadlocks', 'Safe state', 'A completion sequence exists in which all processes can obtain resources, finish, and release them.'],
+      ['Memory', 'Swap space', 'Disk-backed storage for memory pages not resident in RAM; useful but far slower than RAM.'],
+      ['Memory', 'PTE', 'A page-table entry maps a virtual page to a frame and stores valid, permission, accessed, and dirty status bits.'],
+      ['Virtualization', 'VM vs container', 'VMs have guest kernels; containers share the host kernel and isolate processes with namespaces and cgroups.'],
+      ['Synchronization', 'Critical section', 'Code that accesses shared state and must not be unsafely interleaved.'],
+      ['Synchronization', 'Atomic operation', 'An operation that appears indivisible to other observers.'],
+      ['Deadlocks', 'Safe state', 'A state where some ordering exists in which every process can finish.'],
+      ['Memory', 'Internal fragmentation', 'Unused space inside an allocated fixed-size block.'],
+      ['Memory', 'External fragmentation', 'Free memory split into small, non-contiguous holes.'],
+      ['Virtual memory', 'Working set', 'The pages a process actively needs during a time interval.'],
+      ['Virtual memory', 'Belady’s anomaly', 'With FIFO, adding page frames can paradoxically increase page faults.'],
+      ['File systems', 'Hard link', 'Another directory entry for the same inode / file identity.'],
+      ['File systems', 'Soft link', 'A separate file containing a pathname to another file.'],
+      ['I/O', 'Buffer', 'Temporary transfer area that absorbs a producer-consumer speed mismatch.'],
+      ['I/O', 'Cache', 'Stored copy kept to speed up expected reuse.'],
+      ['I/O', 'LOOK vs SCAN', 'LOOK reverses at the final pending request; SCAN continues to the physical disk end first.'],
+      ['I/O', 'C-LOOK vs C-SCAN', 'C-LOOK wraps between pending requests; C-SCAN wraps at the physical disk boundary.'],
+      ['IPC', 'Pipe vs shared memory', 'A pipe is kernel-buffered and simple; shared memory is faster for large local data but must be synchronized explicitly.'],
+      ['Linux', 'Load average', 'Average number of runnable or uninterruptibly waiting tasks over 1, 5, and 15 minutes.'],
+      ['Protection', 'Principle of least privilege', 'Give code/users only the permissions needed for their task.'],
+      ['Protection', 'System call', 'Controlled entry from user mode into the kernel for an OS service.']
+    ];
+
+    const state = { topic: 'foundations', questionTopic: 'All questions', revisionTopic: 'All cards', tab: 'learn' };
+    const byId = id => document.getElementById(id);
+    const escape = value => value.replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+    function renderBlock(block) {
+      let out = `<section class="card">${block.title ? `<h2>${block.title}</h2>` : ''}`;
+      if (block.text) out += `<p>${block.text}</p>`;
+      if (block.diagram) out += `<div class="diagram">${escape(block.diagram)}</div>`;
+      if (block.bullets) out += `<ul>${block.bullets.map(item => `<li>${item}</li>`).join('')}</ul>`;
+      if (block.table) out += `<div class="table-wrap"><table><thead><tr>${block.table[0].map(v => `<th>${v}</th>`).join('')}</tr></thead><tbody>${block.table.slice(1).map(row => `<tr>${row.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      if (block.callout) out += `<div class="callout">${block.callout}</div>`;
+      return out + '</section>';
+    }
+
+    function renderTopics() {
+      const q = byId('topicSearch').value.trim().toLowerCase();
+      const visible = TOPICS.filter(t => `${t.name} ${t.summary}`.toLowerCase().includes(q));
+      byId('topicCount').textContent = visible.length;
+      byId('topics').innerHTML = visible.length ? visible.map(t => `<div class="topic ${t.id === state.topic ? 'active' : ''}" data-topic="${t.id}"><span>${t.icon} &nbsp;${t.name}</span><span class="topic-badge">${t.blocks.length}</span></div>`).join('') : '<div class="empty">No matching concepts.</div>';
+    }
+
+    function renderLearn() {
+      const topic = TOPICS.find(t => t.id === state.topic) || TOPICS[0];
+      byId('learnTitle').textContent = topic.name;
+      byId('learnCrumb').innerHTML = `Core concepts <span>→ ${topic.name}</span>`;
+      byId('learnContent').innerHTML = `<div class="intro"><h2>${topic.icon} ${topic.name}</h2><p>${topic.summary}</p><div class="pills"><span class="pill green">Interview ready</span><span class="pill">${topic.blocks.length} key ideas</span><span class="pill purple">Read → explain → recall</span></div></div><div class="two-col">${topic.blocks.map(renderBlock).join('')}</div>`;
+      renderTopics();
+    }
+
+    function questionCategories() {
+      return ['All questions', ...Array.from(new Set(QUESTIONS.map(q => q.topic)))];
+    }
+    function renderQuestionTopics() {
+      const categories = questionCategories();
+      const search = byId('questionSearch').value.trim().toLowerCase();
+      byId('questionTopics').innerHTML = categories.map(category => {
+        const n = QUESTIONS.filter(q => (category === 'All questions' || q.topic === category) && `${q.q} ${q.a}`.toLowerCase().includes(search)).length;
+        return `<div class="topic ${category === state.questionTopic ? 'active' : ''}" data-question-topic="${escape(category)}"><span>${category === 'All questions' ? '◈' : '◌'} &nbsp;${category}</span><span class="topic-badge">${n}</span></div>`;
+      }).join('');
+    }
+    function renderQuestions() {
+      const search = byId('questionSearch').value.trim().toLowerCase();
+      const shown = QUESTIONS.filter(q => (state.questionTopic === 'All questions' || q.topic === state.questionTopic) && `${q.q} ${q.a}`.toLowerCase().includes(search));
+      byId('questionCount').textContent = QUESTIONS.length;
+      byId('interviewTitle').textContent = state.questionTopic === 'All questions' ? 'OS Interview Q&A' : state.questionTopic;
+      byId('interviewCrumb').innerHTML = `Question bank <span>→ ${state.questionTopic}</span>`;
+      byId('interviewContent').innerHTML = `<div class="intro"><h2>Explain the mechanism, then the trade-off.</h2><p>Open a question, answer it aloud, then compare your response with the concise interview version.</p><div class="pills"><span class="pill green">${shown.length} questions shown</span><span class="pill">Core = expected</span><span class="pill purple">Deep = strong follow-up</span></div></div><div class="section-title"><span>${state.questionTopic}</span><button id="expandQuestions">Expand all</button></div>${shown.length ? shown.map((item, i) => `<article class="question"><button class="q-btn"><span class="q-arrow">▶</span><span class="q-number">${String(i+1).padStart(2,'0')}</span><span class="q-title">${item.q}</span><span class="level ${item.level}">${item.level}</span></button><div class="answer">${item.a}<div class="say"><strong>Interview line:</strong> ${item.say}</div></div></article>`).join('') : '<div class="empty">No questions match this search.</div>'}`;
+      renderQuestionTopics();
+    }
+
+    function flashCategories() { return ['All cards', ...Array.from(new Set(FLASHCARDS.map(card => card[0])))]; }
+    function renderRevisionTopics() {
+      byId('revisionTopics').innerHTML = flashCategories().map(category => {
+        const count = FLASHCARDS.filter(card => category === 'All cards' || card[0] === category).length;
+        return `<div class="topic ${category === state.revisionTopic ? 'active' : ''}" data-revision-topic="${escape(category)}"><span>${category === 'All cards' ? '◈' : '◌'} &nbsp;${category}</span><span class="topic-badge">${count}</span></div>`;
+      }).join('');
+    }
+    function renderRevision() {
+      const search = byId('flashSearch').value.trim().toLowerCase();
+      const shown = FLASHCARDS.filter(card => (state.revisionTopic === 'All cards' || card[0] === state.revisionTopic) && card.join(' ').toLowerCase().includes(search));
+      byId('revisionContent').innerHTML = `<div class="intro"><h2>Fast recall before an interview</h2><p>Try answering from the front of each card. Click to flip it only after you have a crisp explanation.</p><div class="pills"><span class="pill green">${shown.length} flashcards</span><span class="pill">Active recall</span><span class="pill purple">1–2 minute refresh</span></div></div><div class="flash-grid">${shown.map(card => `<article class="flash"><div class="flash-inner"><div class="flash-face flash-front"><span class="flash-label">${card[0]}</span><span class="flash-term">${card[1]}</span><span class="flash-hint">click to reveal</span></div><div class="flash-face flash-back"><span class="flash-label">Answer</span><span class="flash-answer">${card[2]}</span><span class="flash-hint">click to return</span></div></div></article>`).join('')}</div>${shown.length ? '' : '<div class="empty">No cards match this search.</div>'}`;
+      byId('flashCount').textContent = FLASHCARDS.length;
+      renderRevisionTopics();
+    }
+
+    function setTab(tab) {
+      state.tab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+      document.querySelectorAll('.page').forEach(page => page.classList.toggle('active', page.id === `page-${tab}`));
+      closeSidebar();
+    }
+    function activeSidebar() { return byId(`${state.tab}Sidebar`); }
+    function closeSidebar() { document.querySelectorAll('.sidebar').forEach(sidebar => sidebar.classList.remove('open')); byId('overlay').classList.remove('open'); }
+    function toggleSidebar() { const sidebar = activeSidebar(); sidebar.classList.toggle('open'); byId('overlay').classList.toggle('open', sidebar.classList.contains('open')); }
+
+    document.addEventListener('click', event => {
+      const tab = event.target.closest('.tab-btn');
+      if (tab) setTab(tab.dataset.tab);
+      const topic = event.target.closest('[data-topic]');
+      if (topic) { state.topic = topic.dataset.topic; renderLearn(); closeSidebar(); }
+      const qTopic = event.target.closest('[data-question-topic]');
+      if (qTopic) { state.questionTopic = qTopic.dataset.questionTopic; renderQuestions(); closeSidebar(); }
+      const rTopic = event.target.closest('[data-revision-topic]');
+      if (rTopic) { state.revisionTopic = rTopic.dataset.revisionTopic; renderRevision(); closeSidebar(); }
+      const qButton = event.target.closest('.q-btn');
+      if (qButton) qButton.closest('.question').classList.toggle('open');
+      if (event.target.id === 'expandQuestions') {
+        const questions = [...document.querySelectorAll('.question')];
+        const shouldOpen = questions.some(q => !q.classList.contains('open'));
+        questions.forEach(q => q.classList.toggle('open', shouldOpen));
+        event.target.textContent = shouldOpen ? 'Collapse all' : 'Expand all';
+      }
+      const flash = event.target.closest('.flash');
+      if (flash) flash.classList.toggle('flipped');
+    });
+    byId('menuButton').addEventListener('click', toggleSidebar);
+    byId('overlay').addEventListener('click', closeSidebar);
+    byId('topicSearch').addEventListener('input', renderTopics);
+    byId('questionSearch').addEventListener('input', renderQuestions);
+    byId('flashSearch').addEventListener('input', renderRevision);
+    const themeSelect = byId('themeSelect');
+    const themeStyles = {
+      brutalist: byId('brutalistTheme'),
+      maximalism: byId('maximalismTheme'),
+      retro: byId('retroTheme'),
+      glass: byId('glassTheme')
+    };
+    function setTheme(theme, persist = false) {
+      const selectedTheme = Object.prototype.hasOwnProperty.call(themeStyles, theme) || theme === 'classic' ? theme : 'classic';
+      Object.entries(themeStyles).forEach(([name, stylesheet]) => {
+        stylesheet.media = name === selectedTheme ? 'all' : 'not all';
+      });
+      document.body.dataset.theme = selectedTheme;
+      themeSelect.value = selectedTheme;
+      if (persist) {
+        try { localStorage.setItem('os-interview-prep-theme', selectedTheme); } catch (_) { /* Storage may be unavailable. */ }
+      }
+    }
+    themeSelect.addEventListener('change', event => setTheme(event.target.value, true));
+    let savedTheme = 'classic';
+    try { savedTheme = localStorage.getItem('os-interview-prep-theme') || 'classic'; } catch (_) { /* Fall back to Classic. */ }
+    setTheme(savedTheme);
+
+    renderLearn();
+    renderQuestions();
+    renderRevision();
+  </script>
+</body>
+</html>
