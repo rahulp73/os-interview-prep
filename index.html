@@ -617,6 +617,7 @@
         width: 100%;
         max-width: 100%;
         overflow-x: clip;
+        overscroll-behavior-y: none;
       }
 
       .app {
@@ -703,7 +704,7 @@
       .page, .main, .main-head, .content { min-width: 0; max-width: 100%; }
       .main-head { min-height: 52px; padding: 9px 14px; }
       .main-head h1, .section-title > span, .q-title { min-width: 0; overflow-wrap: anywhere; }
-      .content { overflow-x: hidden; overflow-x: clip; padding: 15px 13px 48px; }
+      .content { overflow-x: hidden; overflow-x: clip; overscroll-behavior-y: contain; padding: 15px 13px 48px; }
 
       .intro, .card, .question, .overview-card, .flash, .table-wrap, .diagram {
         min-width: 0;
