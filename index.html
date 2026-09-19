@@ -739,7 +739,7 @@
       <button class="tab-btn active" data-tab="learn">⚙️ Core Concepts</button>
       <button class="tab-btn" data-tab="interview">💬 Interview Q&amp;A</button>
       <button class="tab-btn" data-tab="revision">🧠 Revision Deck</button>
-      <label class="theme-control" for="themeSelect"><span>Theme</span><select class="theme-select" id="themeSelect"><option value="classic" selected>Classic</option><option value="brutalist">Brutalism</option><option value="maximalism">Maximalism</option><option value="retro">Retro</option><option value="glass">Glass</option></select></label>
+      <label class="theme-control" for="themeSelect"><span>Theme</span><select class="theme-select" id="themeSelect"><option value="classic">Classic</option><option value="brutalist">Brutalism</option><option value="maximalism" selected>Maximalism</option><option value="retro">Retro</option><option value="glass">Glass</option></select></label>
     </header>
 
     <div class="overlay" id="overlay"></div>
@@ -1128,8 +1128,8 @@
       }
     }
     themeSelect.addEventListener('change', event => setTheme(event.target.value, true));
-    let savedTheme = 'classic';
-    try { savedTheme = localStorage.getItem('os-interview-prep-theme') || 'classic'; } catch (_) { /* Fall back to Classic. */ }
+    let savedTheme = 'maximalism';
+    try { savedTheme = localStorage.getItem('os-interview-prep-theme') || 'maximalism'; } catch (_) { /* Fall back to Maximalism. */ }
     setTheme(savedTheme);
 
     renderLearn();
